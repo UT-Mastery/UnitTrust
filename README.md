@@ -1,2 +1,2 @@
-# UnitTrust
-Price. NAV. Cost Averaging. Comparison
+UnitTrust
+Price. DCA. Compare
