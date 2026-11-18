@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jejak DCA</title>
+<meta name="theme-color" content="#1f6f5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jejak DCA">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#eef2ef;--surface:#fff;--ink:#14231f;--mute:#5d6e68;--line:#d5ddd9;--accent:#1f6f5c;--on-accent:#fff;--gain:#1f7a4d;--loss:#b3392f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a17;--surface:#17251f;--ink:#e6efeb;--mute:#8fa39b;--line:#2a3b34;--accent:#4fb99b;--on-accent:#06130f;--gain:#5fd29a;--loss:#ff8a7e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:560px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:15px;font-weight:600;margin:0;color:var(--mute)}
+.total{font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:6px 0 2px}
+.sub{color:var(--mute);font-size:14px}.pl{font-weight:600}.up{color:var(--gain)}.down{color:var(--loss)}
+.bar{display:flex;gap:8px;margin:18px 0 6px}
+#status{font-size:12px;color:var(--mute);margin-bottom:12px}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;min-height:44px}
+button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fund{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+summary{list-style:none;padding:14px 16px;cursor:pointer}summary::-webkit-details-marker{display:none}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.name{font-weight:600}.val{font-weight:800;font-size:19px;letter-spacing:-.02em;white-space:nowrap}
+.co{font-size:12px;color:var(--mute)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 14px}
+.stats div{font-size:12px;color:var(--mute)}.stats b{display:block;font-size:15px;color:var(--ink);font-weight:600}
+.body{border-top:1px solid var(--line);padding:14px 16px}
+form{display:grid;gap:8px;margin-bottom:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label{font-size:13px;color:var(--mute);display:grid;gap:4px}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;width:100%}
+.ent{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.ent small{color:var(--mute);display:block}.x{min-height:32px;padding:2px 10px;color:var(--loss)}
+.empty{color:var(--mute);text-align:center;padding:36px 12px;border:1px dashed var(--line);border-radius:14px}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);width:min(94vw,460px);padding:16px}
+dialog::backdrop{background:rgba(0,0,0,.45)}h2{margin:0 0 10px;font-size:18px}
+#res{max-height:50vh;overflow:auto;margin:10px 0}
+#res button{display:block;width:100%;text-align:left;margin-bottom:6px;font-size:14px}
+#res small{color:var(--mute);display:block}
+.note{font-size:12px;color:var(--mute);margin-top:18px;text-align:center}
+#tabs{display:flex;gap:6px;margin:10px 0 14px}
+#tabs button{flex:1;min-height:40px;padding:6px 4px;font-size:14px}
+#tabs button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;width:100%;margin-top:8px}
+.scroll{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;font-size:13px;width:100%}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+th{color:var(--mute);font-weight:600;cursor:pointer}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cd{min-height:58px;padding:4px;text-align:left;font-size:12px;line-height:1.3;border-radius:8px}
+.cd.today{outline:2px solid var(--accent)}.cd.sel{background:var(--bg);border-color:var(--accent)}
+.cd.empty{border:0;background:none;cursor:default}
+.dca{border-top:1px solid var(--line);margin-top:4px;padding:12px 0}
+.chip{font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:99px;padding:0 6px;margin-left:6px}
+.banner{background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%}
+</style>
+</head>
+<body>
+<main>
+  <h1>Jejak DCA</h1>
+  <div id="tabs"><button data-tab="port" class="on">Portfolio</button><button data-tab="price">Harga</button><button data-tab="cal">Kalendar</button><button data-tab="cmp">Banding</button></div>
+  <div id="t-port" class="tab">
+  <div class="total" id="total">RM 0.00</div>
+  <div class="sub"><span class="pl" id="pl">–</span> · modal <span id="inv">RM 0.00</span> <span>(dana RM sahaja)</span></div><div class="sub" id="dcaInfo"></div>
+  <div class="bar"><button class="primary" id="addFund">Tambah dana</button><button id="refresh">Muat semula harga</button><button id="backup">Sandaran</button></div>
+  <div id="status">Memuatkan harga…</div>
+  <div id="banner"></div><div id="list"></div>
+  <div class="note">Sumber harga: FIMM (semua syarikat unit trust berdaftar). Harga FIMM ialah panduan; harga pengurus dana yang rasmi. Data anda disimpan dalam peranti ini sahaja.</div>
+</div>
+<div id="t-price" class="tab" hidden>
+  <input id="pq" placeholder="Cari nama dana atau syarikat…" autocomplete="off">
+  <select id="pco"></select>
+  <div class="sub" id="pinfo" style="margin:10px 0"></div>
+  <div id="plist"></div>
+  <button id="pmore" hidden style="width:100%">Papar lagi</button>
+</div>
+<div id="t-cal" class="tab" hidden>
+  <div class="row" style="align-items:center"><button id="cprev">‹</button><b id="cmon"></b><button id="cnext">›</button></div>
+  <div class="cal" id="cgrid"></div>
+  <div id="cday"></div>
+  <div class="note">◷ DCA dijadualkan · ✔ pembelian direkod · ▲▼ perubahan harga portfolio. Perubahan harga muncul bagi hari yang ada sejarah NAV (dikumpul setiap hari bekerja).</div>
+</div>
+<div id="t-cmp" class="tab" hidden>
+  <div class="row" style="align-items:center"><button class="primary" id="cmpAdd">Tambah dana</button><span class="sub" id="cmpN"></span></div>
+  <div id="cmpChips" style="margin-top:10px"></div>
+  <div id="cmpChart"></div>
+  <h2 style="margin-top:14px;font-size:16px">Prestasi dana</h2>
+  <div class="scroll" id="cmpTbl"></div>
+  <h2 style="margin-top:14px;font-size:16px">Prestasi pelaburan saya</h2>
+  <div class="scroll" id="cmpInv"></div>
+  <div class="note" id="cmpNote"></div>
+</div>
+</main>
+<dialog id="dlg">
+  <h2>Cari dana</h2>
+  <input id="q" placeholder="Taip nama dana atau syarikat, cth. public ittikal" autocomplete="off">
+  <div id="res"></div>
+  <button id="close">Tutup</button>
+</dialog>
+<dialog id="dlg2"><h2>Sandaran data</h2><p class="sub">Salin teks ini dan simpan di Nota. Untuk pulih atau pindah ke telefon lain, tampal di sini dan tekan Pulihkan.</p><textarea id="bk" rows="8"></textarea><div class="two" style="margin-top:8px"><button id="bkCopy">Salin</button><button id="bkRestore" class="primary">Pulihkan</button></div><button id="bkClose" style="margin-top:8px;width:100%">Tutup</button></dialog>
+<script>
+(function(){
+  if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
+  var KEY="jejak-dca-v2",S={funds:[]},open={},P={asOf:"",funds:[],map:{}};
+  try{var raw=localStorage.getItem(KEY);if(raw)S=JSON.parse(raw)}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+  var $=function(i){return document.getElementById(i)};
+  function money(n,c){return((!c||c==="MYR")?"RM":c)+" "+(n||0).toLocaleString("en-MY",{minimumFractionDigits:2,maximumFractionDigits:2})}
+  function pct(n){return(n>=0?"+":"")+n.toFixed(2)+"%"}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function dmy(d){var p=(d||"").split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:d}
+  function calc(f){var inv=0,u=0;f.entries.forEach(function(e){inv+=e.amount;u+=e.units});var v=u*(f.nav||0);return{inv:inv,u:u,avg:u?inv/u:0,val:v,pl:v-inv,pp:inv?(v-inv)/inv*100:0}}
+  function find(id){return S.funds.filter(function(f){return f.id===id})[0]}
+  function setStatus(t){$("status").textContent=t}
+  function pad(n){return(n<10?"0":"")+n}
+  function today(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+  function dcaDates(p,t){
+    var out=[],s=new Date(p.start+"T00:00:00"),y=s.getFullYear(),m=s.getMonth();
+    for(var i=0;i<600;i++){
+      var d=y+"-"+pad(m+1)+"-"+pad(p.day);
+      if(d>=p.start){if(d>t){out.next=d;break}out.push(d)}
+      m++;if(m>11){m=0;y++}
+    }
+    return out;
+  }
+  function pending(f){if(!f.plan)return false;var d=dcaDates(f.plan,today());return d.length>0&&d[d.length-1]>(f.plan.last||"")}
+  function recordDca(f){
+    if(!pending(f)||!(f.nav>0))return false;
+    var p=f.plan,d=dcaDates(p,today());
+    f.entries.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),date:today(),amount:p.amount,price:f.nav,units:p.amount/f.nav,src:"dca"});
+    p.last=d[d.length-1];return true;
+  }
+  function dcaHtml(f){
+    var p=f.plan,cu=f.cur||"MYR";
+    if(!p)return'<div class="dca"><b>Pelan DCA bulanan</b><form data-plan="'+f.id+'" onsubmit="return false"><div class="two"><label>Jumlah sebulan<input name="amount" type="number" step="any" min="0" inputmode="decimal" placeholder="cth. 200"></label><label>Hari (1-28)<input name="day" type="number" min="1" max="28" inputmode="numeric" value="'+Math.min(28,new Date().getDate())+'"></label></div><label>Bermula<input name="start" type="date" value="'+today()+'"></label><button type="button" data-act="plan" data-id="'+f.id+'">Simpan pelan DCA</button></form></div>';
+    var d=dcaDates(p,today()),pend=pending(f);
+    return'<div class="dca"><b>Pelan DCA bulanan</b><div class="sub">'+money(p.amount,cu)+' pada hari ke-'+p.day+' setiap bulan'+(d.next?' · seterusnya '+dmy(d.next):'')+'</div>'+
+      (pend?'<button class="primary" style="margin-top:8px" data-act="dca" data-id="'+f.id+'"'+(f.nav>0?'':' disabled')+'>Rekod DCA: '+money(p.amount,cu)+' @ NAV '+(f.nav?f.nav.toFixed(4):"?")+'</button>':'<div class="sub">Tiada DCA tertunggak.</div>')+
+      '<div><button class="x" data-act="rmplan" data-id="'+f.id+'">Padam pelan</button></div></div>';
+  }
+
+  function render(){
+    var ti=0,tv=0,h="";
+    S.funds.forEach(function(f){if(!f.cur||f.cur==="MYR"){var c=calc(f);ti+=c.inv;tv+=c.val}});
+    $("total").textContent=money(tv);$("inv").textContent=money(ti);
+    var p=tv-ti,el=$("pl");
+    el.textContent=ti?(p>=0?"+":"-")+money(Math.abs(p))+" ("+pct(p/ti*100)+")":"Belum ada pelaburan";
+    el.className="pl "+(p>=0?"up":"down");
+    var pc=0,commit=0;
+    S.funds.forEach(function(f){if(f.plan){if(!f.cur||f.cur==="MYR")commit+=f.plan.amount;if(pending(f)&&f.nav>0)pc++}});
+    $("dcaInfo").textContent=commit?"Komitmen DCA: "+money(commit)+" sebulan":"";
+    $("banner").innerHTML=pc?'<div class="banner"><span>'+pc+' pembelian DCA tertunggak (guna NAV terkini)</span><button class="primary" id="dcaAll">Rekod semua</button></div>':"";
+    if(pc)$("dcaAll").onclick=function(){S.funds.forEach(recordDca);save();render()};
+    if(!S.funds.length){$("list").innerHTML='<div class="empty">Belum ada dana. Tekan <b>Tambah dana</b> dan cari dana daripada mana-mana syarikat unit trust.</div>';return}
+    S.funds.forEach(function(f){
+      var c=calc(f),cls=c.pl>=0?"up":"down",cu=f.cur;
+      h+='<details class="fund" data-id="'+f.id+'"'+(open[f.id]?" open":"")+'><summary><div class="row"><span class="name">'+esc(f.name)+'</span><span class="val">'+money(c.val,cu)+'</span></div>'+
+      '<div class="co">'+esc(f.company||"Dana manual")+(f.plan?'<span class="chip">DCA '+money(f.plan.amount,cu)+(pending(f)?' · tertunggak':'')+'</span>':'')+'</div>'+
+      '<div class="sub"><span class="'+cls+'">'+(c.inv?pct(c.pp):"–")+'</span> · NAV '+(f.nav?f.nav.toFixed(4):"belum ada")+(f.navDate?" ("+dmy(f.navDate)+")":"")+(f.status?" · "+esc(f.status):"")+'</div></summary>'+
+      '<div class="stats"><div>Modal<b>'+money(c.inv,cu)+'</b></div><div>Unit<b>'+c.u.toFixed(2)+'</b></div><div>Purata kos<b>'+c.avg.toFixed(4)+'</b></div></div>'+
+      '<div class="body">'+(f.key?'':'<form data-nav="'+f.id+'" onsubmit="return false"><div class="two"><label>NAV (manual)<input name="nav" type="number" step="any" min="0" inputmode="decimal" value="'+(f.nav||"")+'"></label><button type="button" data-act="nav" data-id="'+f.id+'" style="align-self:end">Kemas kini</button></div></form>')+
+      dcaHtml(f)+'<form data-buy="'+f.id+'" onsubmit="return false"><div class="two"><label>Tarikh<input name="date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><label>Jumlah ('+(cu||"MYR")+')<input name="amount" type="number" step="any" min="0" inputmode="decimal" placeholder="cth. 200"></label></div>'+
+      '<label>NAV pembelian<input name="price" type="number" step="any" min="0" inputmode="decimal" value="'+(f.nav||"")+'"></label>'+
+      '<button type="button" class="primary" data-act="buy" data-id="'+f.id+'">Tambah pembelian</button></form>'+
+      f.entries.slice().reverse().map(function(e){return'<div class="ent"><div>'+esc(e.date)+(e.src==="dca"?'<span class="chip">DCA</span>':'')+'<small>'+e.units.toFixed(2)+' unit @ '+e.price.toFixed(4)+'</small></div><div>'+money(e.amount,cu)+' <button class="x" data-act="del" data-id="'+f.id+'" data-e="'+e.id+'">Padam</button></div></div>'}).join("")+
+      '<div style="margin-top:12px"><button class="x" data-act="rmfund" data-id="'+f.id+'">Padam dana ini</button></div></div></details>';
+    });
+    $("list").innerHTML=h;
+  }
+
+  function load(){
+    setStatus("Mengemas kini harga…");
+    return fetch("prices.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+      P.asOf=d.asOf;P.funds=d.funds;P.map={};
+      d.funds.forEach(function(f){P.map[f.c+"|"+f.n]=f});
+      var miss=0;
+      S.funds.forEach(function(f){if(!f.key)return;var q=P.map[f.key];if(!q){miss++;return}
+        f.cur=q.cur;f.status=q.s||"";if(q.p){f.nav=q.p;f.navDate=d.asOf}});
+      save();
+      setStatus("NAV FIMM bertarikh "+dmy(d.asOf)+" · disemak "+new Date().toLocaleTimeString("ms-MY",{hour:"2-digit",minute:"2-digit"})+(miss?" · "+miss+" dana tiada dalam senarai FIMM":""));
+    }).catch(function(){setStatus("Tak dapat ambil harga baharu. Guna NAV terakhir yang disimpan.")}).then(function(){render();loadHist()});
+  }
+
+  $("refresh").onclick=load;
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)load()});
+  $("list").addEventListener("toggle",function(e){var d=e.target;if(d.dataset&&d.dataset.id)open[d.dataset.id]=d.open},true);
+  $("list").addEventListener("click",function(e){
+    var b=e.target.closest("button[data-act]");if(!b)return;
+    var f=find(b.dataset.id),a=b.dataset.act;if(!f)return;
+    if(a==="nav"){var v=parseFloat(document.querySelector('[data-nav="'+f.id+'"] [name=nav]').value);if(v>0){f.nav=v;f.navDate="";save();render()}}
+    if(a==="buy"){var q=document.querySelector('[data-buy="'+f.id+'"]'),amt=parseFloat(q.amount.value),pr=parseFloat(q.price.value);
+      if(!(amt>0&&pr>0)){alert("Isi jumlah dan NAV dengan nombor lebih daripada 0.");return}
+      f.entries.push({id:String(Date.now()),date:q.date.value,amount:amt,price:pr,units:amt/pr});
+      if(!f.nav)f.nav=pr;save();render()}
+    if(a==="del"){f.entries=f.entries.filter(function(x){return x.id!==b.dataset.e});save();render()}
+    if(a==="plan"){var q2=document.querySelector('[data-plan="'+f.id+'"]'),am=parseFloat(q2.amount.value),dy=parseInt(q2.day.value,10),st=q2.start.value;
+      if(!(am>0&&dy>=1&&dy<=28&&st)){alert("Isi jumlah, hari (1-28) dan tarikh mula.");return}
+      f.plan={amount:am,day:dy,start:st,last:""};var dd=dcaDates(f.plan,today());f.plan.last=dd.length?dd[dd.length-1]:"";save();render()}
+    if(a==="rmplan"&&confirm("Padam pelan DCA untuk dana ini?")){delete f.plan;save();render()}
+    if(a==="dca"&&recordDca(f)){save();render()}
+    if(a==="rmfund"&&confirm("Padam "+f.name+" dan semua rekodnya?")){S.funds=S.funds.filter(function(x){return x!==f});save();render()}
+  });
+
+  function addFund(o){var id=String(Date.now());S.funds.push(Object.assign({id:id,entries:[]},o));open[id]=true;save();$("dlg").close();render()}
+  function search(){
+    var t=$("q").value.toLowerCase().split(/\s+/).filter(Boolean),out=[],h="";
+    if(t.length){for(var i=0;i<P.funds.length&&out.length<30;i++){var f=P.funds[i],s=(f.n+" "+f.c).toLowerCase();if(t.every(function(w){return s.indexOf(w)>-1}))out.push(f)}}
+    out.forEach(function(f,i){h+='<button data-i="'+i+'">'+esc(f.n)+'<small>'+esc(f.c)+' · '+(f.p?f.p.toFixed(4)+" "+f.cur:(f.s||"tiada harga"))+'</small></button>'});
+    if(t.length&&!out.length)h='<div class="sub">Tiada padanan'+(P.funds.length?"":" (senarai harga belum dimuat)")+'.</div>';
+    if(t.length)h+='<button data-manual="1">Tambah manual: '+esc($("q").value)+'</button>';
+    $("res").innerHTML=h;$("res")._out=out;
+  }
+  $("q").oninput=search;
+  $("res").addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    if(b.dataset.manual){if(mode==="cmp")return;addFund({name:$("q").value.trim(),company:"",nav:0,cur:"MYR"});return}
+    var f=$("res")._out[+b.dataset.i];if(mode==="cmp"){addCmp(f.c+"|"+f.n);$("dlg").close();renderCmp();return}
+    addFund({key:f.c+"|"+f.n,name:f.n,company:f.c,nav:f.p||0,navDate:f.p?P.asOf:"",cur:f.cur,status:f.s||""});
+  });
+  $("addFund").onclick=function(){mode="track";$("q").value="";$("res").innerHTML="";$("dlg").showModal();$("q").focus()};
+  $("close").onclick=function(){$("dlg").close()};
+  var H={d:[],s:{}},tab="port",mode="track",cmpSort="y1",pShown=60,nowD=new Date(),cal={y:nowD.getFullYear(),m:nowD.getMonth(),sel:today()};
+  var COLORS=["#1f6f5c","#d1495b","#edae49","#00798c","#66a182","#8d5a97","#30638e","#c1666b","#6c757d","#e08d3c"];
+  var MN=["Januari","Februari","Mac","April","Mei","Jun","Julai","Ogos","September","Oktober","November","Disember"];
+  S.cmp=S.cmp||[];
+  /*PURE_START*/
+  function addDays(iso,n){var d=new Date(iso+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+  function lastIdx(a,upto){for(var i=Math.min(upto===undefined?a.length-1:upto,a.length-1);i>=0;i--)if(a[i]!=null)return i;return -1}
+  function navOn(k,date){var a=H.s[k];if(!a)return null;var i=H.d.length-1;while(i>=0&&H.d[i]>date)i--;var j=lastIdx(a,i);return j<0?null:a[j]}
+  function rets(k){
+    var a=H.s[k];if(!a)return{};var e=lastIdx(a);if(e<0)return{};var ed=H.d[e],o={};
+    function r(from){var i=H.d.length-1;while(i>=0&&H.d[i]>from)i--;if(i<0)return null;var b=lastIdx(a,i);if(b<0||b>=e||H.d[b]<addDays(from,-7))return null;return(a[e]/a[b]-1)*100}
+    o.d1=r(addDays(ed,-1));o.m1=r(addDays(ed,-30));o.m3=r(addDays(ed,-91));o.m6=r(addDays(ed,-182));o.y1=r(addDays(ed,-365));o.ytd=r((+ed.slice(0,4)-1)+"-12-31");
+    var f=0;while(f<a.length&&a[f]==null)f++;o.since=f<e?(a[e]/a[f]-1)*100:null;o.sinceD=H.d[f];return o;
+  }
+  /*PURE_END*/
+  function loadHist(){return fetch("history.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(h){H=h;if(tab!=="port")showTab(tab)}).catch(function(){})}
+  function pc(n){return n==null?'<span class="sub">–</span>':'<span class="'+(n>=0?"up":"down")+'">'+pct(n)+'</span>'}
+  function trackFund(f){
+    var k=f.c+"|"+f.n;if(S.funds.some(function(x){return x.key===k}))return false;
+    S.funds.push({id:String(Date.now())+Math.random().toString(36).slice(2,5),entries:[],key:k,name:f.n,company:f.c,nav:f.p||0,navDate:f.p?P.asOf:"",cur:f.cur,status:f.s||""});save();return true;
+  }
+  function addCmp(k){if(S.cmp.indexOf(k)<0){if(S.cmp.length>=10){alert("Maksimum 10 dana untuk perbandingan.");return}S.cmp.push(k);save()}}
+  function showTab(t){
+    tab=t;["port","price","cal","cmp"].forEach(function(x){$("t-"+x).hidden=x!==t});
+    Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){b.className=b.dataset.tab===t?"on":""});
+    if(t==="price")renderPrice();if(t==="cal")renderCal();if(t==="cmp")renderCmp();if(t==="port")render();
+  }
+  $("tabs").onclick=function(e){var b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)};
+
+  function renderPrice(reset){
+    if(reset)pShown=60;
+    var sel=$("pco");
+    if(sel._n!==P.funds.length){var cs={};P.funds.forEach(function(f){cs[f.c]=1});sel.innerHTML='<option value="">Semua syarikat</option>'+Object.keys(cs).sort().map(function(c){return'<option>'+esc(c)+'</option>'}).join("");sel._n=P.funds.length}
+    var t=$("pq").value.toLowerCase().split(/\s+/).filter(Boolean),co=sel.value,out=[];
+    P.funds.forEach(function(f){if(co&&f.c!==co)return;var s=(f.n+" "+f.c).toLowerCase();if(t.every(function(w){return s.indexOf(w)>-1}))out.push(f)});
+    P._out=out;$("pinfo").textContent=out.length+" dana · NAV FIMM "+(P.asOf?dmy(P.asOf):"belum dimuat");
+    var h="";
+    out.slice(0,pShown).forEach(function(f,i){
+      var r=rets(f.c+"|"+f.n),tr=S.funds.some(function(x){return x.key===f.c+"|"+f.n});
+      h+='<div class="fund" style="padding:10px 14px"><div class="row"><span class="name">'+esc(f.n)+'</span><span class="val">'+(f.p?f.p.toFixed(4):esc(f.s||"–"))+'</span></div><div class="co">'+esc(f.c)+' · '+f.cur+(r.d1!=null?' · '+pc(r.d1):'')+'</div>'+
+      '<div style="margin-top:8px;display:flex;gap:6px"><button data-pi="'+i+'" data-pa="track"'+(tr?' disabled':'')+'>'+(tr?'✓ Dijejak':'+ Jejak')+'</button><button data-pi="'+i+'" data-pa="cmp">⇄ Banding</button></div></div>';
+    });
+    $("plist").innerHTML=h||'<div class="empty">Tiada padanan, atau harga belum dimuat.</div>';
+    $("pmore").hidden=out.length<=pShown;
+  }
+  $("pq").oninput=function(){renderPrice(1)};$("pco").onchange=function(){renderPrice(1)};
+  $("pmore").onclick=function(){pShown+=60;renderPrice()};
+  $("plist").onclick=function(e){
+    var b=e.target.closest("button[data-pi]");if(!b)return;var f=P._out[+b.dataset.pi];if(!f)return;
+    if(b.dataset.pa==="track"){if(trackFund(f)){b.textContent="✓ Dijejak";b.disabled=true}}
+    else{addCmp(f.c+"|"+f.n);b.textContent="✓ Dalam banding ("+S.cmp.length+")"}
+  };
+
+  function renderCmp(){
+    var ks=S.cmp.slice(),COLS=[["d1","1H"],["m1","1B"],["m3","3B"],["m6","6B"],["ytd","YTD"],["y1","1T"],["since","Sejak mula"]];
+    $("cmpN").textContent=ks.length+"/10 dana";
+    $("cmpChips").innerHTML=ks.map(function(k,i){return'<span class="chip" style="margin:0 6px 6px 0;display:inline-block;border-color:'+COLORS[i]+'">'+esc(k.split("|")[1])+' <a data-rm="'+esc(k)+'" style="cursor:pointer">✕</a></span>'}).join("");
+    var rows=ks.map(function(k,i){var q=P.map[k];return{k:k,i:i,name:k.split("|")[1],nav:q?q.p:null,r:rets(k)}});
+    rows.sort(function(a,b){var x=a.r[cmpSort],y=b.r[cmpSort];if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return-1;return y-x});
+    var th='<table><tr><th>Dana</th><th>NAV</th>'+COLS.map(function(c){return'<th data-s="'+c[0]+'">'+c[1]+(cmpSort===c[0]?" ↓":"")+'</th>'}).join("")+'</tr>';
+    rows.forEach(function(r){th+='<tr><td><span style="color:'+COLORS[r.i]+'">●</span> '+esc(r.name.length>26?r.name.slice(0,25)+"…":r.name)+'</td><td>'+(r.nav?r.nav.toFixed(4):"–")+'</td>'+COLS.map(function(c){return'<td>'+pc(r.r[c[0]])+'</td>'}).join("")+'</tr>'});
+    $("cmpTbl").innerHTML=ks.length?th+'</table>':'<div class="empty">Tambah sehingga 10 dana untuk dibandingkan. Anda juga boleh tekan ⇄ Banding di tab Harga.</div>';
+    var ih='',n=0;
+    ih='<table><tr><th>Dana</th><th>Modal</th><th>Nilai</th><th>U/R</th><th>Purata kos</th><th>NAV vs kos</th></tr>';
+    ks.forEach(function(k){var f=S.funds.filter(function(x){return x.key===k})[0];if(!f||!f.entries.length)return;n++;var c=calc(f);
+      ih+='<tr><td>'+esc(f.name.length>26?f.name.slice(0,25)+"…":f.name)+'</td><td>'+money(c.inv,f.cur)+'</td><td>'+money(c.val,f.cur)+'</td><td>'+pc(c.pp)+'</td><td>'+c.avg.toFixed(4)+'</td><td>'+pc(c.avg&&f.nav?(f.nav/c.avg-1)*100:null)+'</td></tr>'});
+    $("cmpInv").innerHTML=n?ih+'</table>':'<div class="sub">Jejak dana (+ Jejak) dan rekod pembelian untuk lihat prestasi pelaburan anda di sini.</div>';
+    // carta: indeks 100 pada permulaan tetingkap 1 tahun
+    var hd=H.d,svg="";
+    if(hd.length>1&&ks.length){
+      var from=addDays(hd[hd.length-1],-365),st=0;while(st<hd.length&&hd[st]<from)st++;
+      var lines=[],mn=1e9,mx=-1e9;
+      ks.forEach(function(k,i){var a=H.s[k];if(!a)return;var b=null,pts=[];for(var j=st;j<hd.length;j++){if(a[j]==null)continue;if(b==null)b=a[j];var v=a[j]/b*100;pts.push([j,v]);mn=Math.min(mn,v);mx=Math.max(mx,v)}if(pts.length>1)lines.push([i,pts])});
+      if(lines.length){var W=340,Hh=150,span=Math.max(1,hd.length-1-st),pad2=(mx-mn)||1;
+        svg='<svg viewBox="0 0 '+W+' '+(Hh+16)+'" width="100%" role="img" aria-label="Carta prestasi indeks 100"><line x1="0" x2="'+W+'" y1="'+(Hh-(100-mn)/pad2*Hh)+'" y2="'+(Hh-(100-mn)/pad2*Hh)+'" stroke="var(--line)" stroke-dasharray="3"/>'+
+        lines.map(function(l){return'<polyline fill="none" stroke="'+COLORS[l[0]]+'" stroke-width="2" points="'+l[1].map(function(p){return((p[0]-st)/span*W).toFixed(1)+","+(Hh-(p[1]-mn)/pad2*Hh).toFixed(1)}).join(" ")+'"/>'}).join("")+
+        '<text x="0" y="'+(Hh+13)+'" font-size="10" fill="var(--mute)">'+dmy(hd[st])+'</text><text x="'+W+'" y="'+(Hh+13)+'" font-size="10" text-anchor="end" fill="var(--mute)">'+dmy(hd[hd.length-1])+'</text></svg><div class="sub">Indeks prestasi NAV (mula = 100)</div>'}
+    }
+    $("cmpChart").innerHTML=svg;
+    $("cmpNote").textContent="Sejarah harga: "+hd.length+" hari"+(hd.length?" (sejak "+dmy(hd[0])+")":"")+". Pulangan dikira daripada perubahan NAV sahaja, belum termasuk agihan pendapatan. Tempoh 1B/3B/6B/1T muncul selepas sejarah mencukupi; \"Sejak mula\" boleh dilihat dari hari kedua.";
+  }
+  $("cmpTbl").onclick=function(e){var h=e.target.closest("th[data-s]");if(h){cmpSort=h.dataset.s;renderCmp()}};
+  $("cmpChips").onclick=function(e){var a=e.target.closest("a[data-rm]");if(a){S.cmp=S.cmp.filter(function(k){return k!==a.dataset.rm});save();renderCmp()}};
+  $("cmpAdd").onclick=function(){mode="cmp";$("q").value="";$("res").innerHTML="";$("dlg").showModal();$("q").focus()};
+
+  function dcaOn(p,iso){return+iso.slice(8)===p.day&&iso>=p.start}
+  function unitsAt(f,date){var u=0;f.entries.forEach(function(e){if(e.date<=date)u+=e.units});return u}
+  function dayMove(date){
+    var i=H.d.indexOf(date);if(i<1)return null;var pd=H.d[i-1],ch=0,val=0,has=false;
+    S.funds.forEach(function(f){if(!f.key||(f.cur&&f.cur!=="MYR"))return;var u=unitsAt(f,pd),a=navOn(f.key,date),b=navOn(f.key,pd);if(u>0&&a!=null&&b!=null){ch+=u*(a-b);val+=u*a;has=true}});
+    return has?{ch:ch,val:val}:null;
+  }
+  function renderCal(){
+    var y=cal.y,m=cal.m,t=today();$("cmon").textContent=MN[m]+" "+y;
+    var off=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),h="";
+    ["Isn","Sel","Rab","Kha","Jum","Sab","Ahd"].forEach(function(x){h+='<div class="sub" style="text-align:center">'+x+'</div>'});
+    for(var i=0;i<off;i++)h+='<div class="cd empty"></div>';
+    for(var d=1;d<=days;d++){
+      var iso=y+"-"+pad(m+1)+"-"+pad(d),plan=0,buy=0,mk="";
+      S.funds.forEach(function(f){if(f.plan&&dcaOn(f.plan,iso))plan++;f.entries.forEach(function(e){if(e.date===iso)buy++})});
+      var mv=dayMove(iso);
+      if(plan)mk+='<span style="color:var(--accent)">◷</span>';
+      if(buy)mk+='<span class="up">✔</span>';
+      if(mv)mk+='<span class="'+(mv.ch>=0?"up":"down")+'">'+(mv.ch>=0?"▲":"▼")+'</span>';
+      h+='<button class="cd'+(iso===t?" today":"")+(iso===cal.sel?" sel":"")+'" data-d="'+iso+'"><b>'+d+'</b><br>'+mk+'</button>';
+    }
+    $("cgrid").innerHTML=h;dayDetail(cal.sel);
+  }
+  function dayDetail(iso){
+    var h='<div class="fund" style="padding:12px 14px;margin-top:10px"><b>'+dmy(iso)+'</b>',any=false,i=H.d.indexOf(iso);
+    S.funds.forEach(function(f){
+      var l=[];
+      if(f.plan&&dcaOn(f.plan,iso))l.push("DCA dijadualkan: "+money(f.plan.amount,f.cur));
+      f.entries.forEach(function(e){if(e.date===iso)l.push((e.src==="dca"?"DCA direkod: ":"Pembelian: ")+money(e.amount,f.cur)+" @ "+e.price.toFixed(4))});
+      if(f.key&&i>-1){var nv=navOn(f.key,iso),pv=i>0?navOn(f.key,H.d[i-1]):null;if(nv!=null)l.push("NAV "+nv.toFixed(4)+(pv?" ("+pct((nv/pv-1)*100)+")":""))}
+      if(l.length){any=true;h+='<div style="margin-top:8px"><div class="name">'+esc(f.name)+'</div>'+l.map(function(x){return'<div class="sub">'+x+'</div>'}).join("")+'</div>'}
+    });
+    var mv=dayMove(iso);
+    if(mv)h+='<div style="margin-top:10px" class="sub">Nilai portfolio (RM): <b>'+money(mv.val)+'</b> · perubahan harga <span class="'+(mv.ch>=0?"up":"down")+'">'+(mv.ch>=0?"+":"-")+money(Math.abs(mv.ch))+'</span></div>';
+    if(!any&&!mv)h+='<div class="sub" style="margin-top:6px">Tiada aktiviti atau data harga pada hari ini.</div>';
+    $("cday").innerHTML=h+'</div>';
+  }
+  $("cgrid").onclick=function(e){var b=e.target.closest("button[data-d]");if(b){cal.sel=b.dataset.d;renderCal()}};
+  $("cprev").onclick=function(){cal.m--;if(cal.m<0){cal.m=11;cal.y--}renderCal()};
+  $("cnext").onclick=function(){cal.m++;if(cal.m>11){cal.m=0;cal.y++}renderCal()};
+
+  $("backup").onclick=function(){$("bk").value=JSON.stringify(S);$("dlg2").showModal()};
+  $("bkCopy").onclick=function(){$("bk").select();try{navigator.clipboard.writeText($("bk").value)}catch(e){document.execCommand("copy")}};
+  $("bkRestore").onclick=function(){try{var o=JSON.parse($("bk").value);if(!o||!Array.isArray(o.funds))throw 0;
+    if(confirm("Ganti semua data dalam app ini dengan sandaran?")){S=o;save();$("dlg2").close();render();load()}}catch(e){alert("Sandaran tidak sah.")}};
+  $("bkClose").onclick=function(){$("dlg2").close()};
+  if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){})}
+  render();load();
+})();
+</script>
+</body>
+</html>
