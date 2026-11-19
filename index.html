@@ -44,7 +44,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}h2{margin:0 0 10px;font-size:18px}
 #res small{color:var(--mute);display:block}
 .note{font-size:12px;color:var(--mute);margin-top:18px;text-align:center}
 #tabs{display:flex;gap:6px;margin:10px 0 14px}
-#tabs button{flex:1;min-height:40px;padding:6px 4px;font-size:14px}
+#tabs button{flex:1;min-height:40px;padding:6px 2px;font-size:13px}
 #tabs button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
 select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;width:100%;margin-top:8px}
 .scroll{overflow-x:auto;margin:10px 0}
@@ -65,7 +65,7 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
 <body>
 <main>
   <h1>Jejak DCA</h1>
-  <div id="tabs"><button data-tab="port" class="on">Portfolio</button><button data-tab="price">Prices</button><button data-tab="cal">Calendar</button><button data-tab="cmp">Compare</button></div>
+  <div id="tabs"><button data-tab="port" class="on">Portfolio</button><button data-tab="price">Prices</button><button data-tab="cal">Calendar</button><button data-tab="cmp">Compare</button><button data-tab="epf">EPF</button></div>
   <div id="t-port" class="tab">
   <div class="total" id="total">RM 0.00</div>
   <div class="sub"><span class="pl" id="pl">–</span> · modal <span id="inv">RM 0.00</span> <span>(dana RM sahaja)</span></div><div class="sub" id="dcaInfo"></div>
@@ -99,6 +99,15 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   <h2 style="margin-top:14px;font-size:16px">Prestasi pelaburan saya</h2>
   <div class="scroll" id="cmpInv"></div>
   <div class="note" id="cmpNote"></div>
+</div>
+<div id="t-epf" class="tab" hidden>
+  <h2 style="font-size:16px;margin:0 0 8px">Kalkulator EPF-MIS 2026–2028</h2>
+  <div class="two"><label>Umur<input id="eAge" type="number" min="18" max="70" inputmode="numeric" placeholder="cth. 35"></label><label>Baki Akaun Persaraan (RM)<input id="eBal" type="number" min="0" step="any" inputmode="decimal" placeholder="cth. 80000"></label></div>
+  <div id="eOut" style="margin-top:12px"></div>
+  <button id="eFunds" style="width:100%;margin-top:8px">Lihat dana layak KWSP</button>
+  <h2 style="margin-top:16px;font-size:16px">Jadual Simpanan Asas mengikut umur (RM)</h2>
+  <div class="scroll" id="eTbl" style="max-height:55vh;overflow-y:auto"></div>
+  <div class="note" style="text-align:left">Formula: (Baki Akaun Persaraan − Simpanan Asas) × 30%, minimum RM1,000. Untuk ahli di bawah umur 55. Lajur 2026 diambil daripada laman i-Invest KWSP. Lajur 2027 dan 2028 diambil daripada jadual yang disiarkan oleh pengurus dana (Hong Leong AM) berdasarkan jadual KWSP, dan saya tak dapat sahkannya terus pada laman KWSP. Sahkan angka anda dalam i-Akaun sebelum membuat keputusan. Pelaburan unit amanah mempunyai risiko dan ini bukan nasihat kewangan.</div>
 </div>
 </main>
 <dialog id="dlg">
@@ -270,9 +279,9 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   }
   function addCmp(k){if(S.cmp.indexOf(k)<0){if(S.cmp.length>=10){alert("Maksimum 10 dana untuk perbandingan.");return}S.cmp.push(k);save()}}
   function showTab(t){
-    tab=t;["port","price","cal","cmp"].forEach(function(x){$("t-"+x).hidden=x!==t});
+    tab=t;["port","price","cal","cmp","epf"].forEach(function(x){$("t-"+x).hidden=x!==t});
     Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){b.className=b.dataset.tab===t?"on":""});
-    if(t==="price")renderPrice();if(t==="cal")renderCal();if(t==="cmp")renderCmp();if(t==="port")render();
+    if(t==="price")renderPrice();if(t==="cal")renderCal();if(t==="cmp")renderCmp();if(t==="epf")renderEpf();if(t==="port")render();
   }
   $("tabs").onclick=function(e){var b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)};
 
@@ -395,6 +404,37 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
     save();renderPrice();
     $("impRes").textContent=rows+" baris dipadankan kepada "+funds+" dana (semua kelas dana yang sama nama). "+(miss.length?"Tidak dijumpai ("+miss.length+"): "+miss.slice(0,12).join("; ")+(miss.length>12?"…":""):"");
   };
+  var BSRAW="18:900,1000,1100;19:1100,1300,1400;20:1500,1600,1800;21:1900,2100,2300;22:4000,4400,4900;23:6200,6900,7600;24:8500,9500,10400;25:11000,12300,13500;26:13700,15300,16700;27:16600,18400,20200;28:19600,21800,24000;29:22900,25400,28000;30:26300,29300,32200;31:30000,33400,36800;32:33900,37700,41500;33:38100,42400,46600;34:42400,47200,52000;35:47000,52400,57700;36:51900,57800,63700;37:57000,63500,70000;38:62400,69500,76600;39:68100,75800,83500;40:74000,82400,90800;41:80200,89400,98400;42:86700,96600,106000;43:93600,104000,114000;44:100000,112000,123000;45:108000,120000,132000;46:115000,129000,142000;47:124000,138000,152000;48:132000,147000,162000;49:141000,157000,173000;50:150000,167000,184000;51:160000,178000,196000;52:170000,189000,209000;53:181000,201000,222000;54:192000,213000,235000;55:203000,226000,250000";
+  var BS={};BSRAW.split(";").forEach(function(r){var p=r.split(":");BS[+p[0]]=p[1].split(",").map(Number)});
+  var EY=[2026,2027,2028];
+  function epfCalc(age,bal){
+    return EY.map(function(y,i){
+      var b=BS[age][i],sur=bal-b,amt=sur*0.3,st="ok";
+      if(bal<=b)st="low";else if(amt<1000)st="min";
+      return{y:y,basic:b,sur:sur,amt:amt,st:st};
+    });
+  }
+  function renderEpf(){
+    if(!renderEpf._i){renderEpf._i=1;S.epf=S.epf||{};if(S.epf.age)$("eAge").value=S.epf.age;if(S.epf.bal!=null)$("eBal").value=S.epf.bal}
+    var age=parseInt($("eAge").value,10),bal=parseFloat($("eBal").value),h="";
+    S.epf={age:age||"",bal:isNaN(bal)?null:bal};save();
+    if(!(age>=18)||isNaN(bal)||bal<0){h='<div class="sub">Isi umur dan baki Akaun Persaraan untuk melihat jumlah yang boleh dilaburkan.</div>'}
+    else if(age>=55){h='<div class="fund" style="padding:12px 14px">Umur 55 tahun ke atas mempunyai peraturan berbeza (contohnya Akaun 55 atau Akaun Emas), jadi kalkulator ini hanya untuk umur 18 hingga 54. Semak peraturan terkini di i-Akaun KWSP.</div>'}
+    else{
+      h='<table><tr><th>Tahun</th><th>Simpanan Asas</th><th>Lebihan</th><th>Boleh dilaburkan (30%)</th></tr>';
+      epfCalc(age,bal).forEach(function(r){
+        var last=r.st==="low"?'<span class="down">Tidak layak: baki di bawah Simpanan Asas</span>':(r.st==="min"?'<span class="down">Tidak layak: kurang RM1,000 (minimum)</span>':'<b class="up">'+money(r.amt)+'</b>');
+        h+='<tr><td>'+r.y+'</td><td>'+money(r.basic)+'</td><td>'+(r.sur>0?money(r.sur):"–")+'</td><td style="white-space:normal;text-align:right">'+last+'</td></tr>';
+      });
+      h+='</table><div class="sub" style="margin-top:6px">Anggaran untuk umur '+age+' dan baki '+money(bal)+' yang sama pada ketiga-tiga tahun. Umur dan baki sebenar anda akan berubah.</div>';
+    }
+    $("eOut").innerHTML=h;
+    var t='<table><tr><th>Umur</th>'+EY.map(function(y){return'<th>'+y+'</th>'}).join("")+'</tr>';
+    Object.keys(BS).forEach(function(a){t+='<tr'+(+a===age?' style="background:var(--bg)"':'')+'><td>'+a+'</td>'+BS[a].map(function(v){return'<td>'+v.toLocaleString("en-MY")+'</td>'}).join("")+'</tr>'});
+    $("eTbl").innerHTML=t+'</table>';
+  }
+  $("eAge").oninput=renderEpf;$("eBal").oninput=renderEpf;
+  $("eFunds").onclick=function(){showTab("price");$("pep").value="1";renderPrice(1)};
   $("backup").onclick=function(){$("bk").value=JSON.stringify(S);$("dlg2").showModal()};
   $("bkCopy").onclick=function(){$("bk").select();try{navigator.clipboard.writeText($("bk").value)}catch(e){document.execCommand("copy")}};
   $("bkRestore").onclick=function(){try{var o=JSON.parse($("bk").value);if(!o||!Array.isArray(o.funds))throw 0;
