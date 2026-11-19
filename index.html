@@ -136,29 +136,55 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   function stm(x){return x==="NA"?"Tiada harga":(x==="SUSP"?"Digantung":(x||""))}
   function pad(n){return(n<10?"0":"")+n}
   function today(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+  function dayNum(iso){var a=iso.split("-");return Math.round(Date.UTC(+a[0],+a[1]-1,+a[2])/864e5)}
+  function isoOf(n){return new Date(n*864e5).toISOString().slice(0,10)}
   function dcaDates(p,t){
-    var out=[],s=new Date(p.start+"T00:00:00"),y=s.getFullYear(),m=s.getMonth();
-    for(var i=0;i<600;i++){
-      var d=y+"-"+pad(m+1)+"-"+pad(p.day);
-      if(d>=p.start){if(d>t){out.next=d;break}out.push(d)}
-      m++;if(m>11){m=0;y++}
+    var out=[],f=p.freq||"m",n=p.every||1,i;
+    if(f==="m"){
+      var a=p.start.split("-"),y=+a[0],m=+a[1]-1;
+      for(i=0;i<1200;i++){var d=y+"-"+pad(m+1)+"-"+pad(p.day);if(d>=p.start){if(d>t){out.next=d;break}out.push(d)}m+=n;while(m>11){m-=12;y++}}
+    }else{
+      var step=n*(f==="w"?7:1),s0=dayNum(p.start);
+      for(i=0;i<5000;i++){var e=isoOf(s0+i*step);if(e>t){out.next=e;break}out.push(e)}
     }
     return out;
   }
-  function pending(f){if(!f.plan)return false;var d=dcaDates(f.plan,today());return d.length>0&&d[d.length-1]>(f.plan.last||"")}
+  function dueList(f){var p=f.plan;if(!p)return[];return dcaDates(p,today()).filter(function(d){return d>(p.last||"")})}
+  function pending(f){return dueList(f).length>0}
+  function freqText(p){var f=p.freq||"m",n=p.every||1;
+    if(f==="d")return n===1?"setiap hari":"setiap "+n+" hari";
+    if(f==="w")return n===1?"setiap minggu":"setiap "+n+" minggu";
+    return(n===1?"setiap bulan":"setiap "+n+" bulan")+" pada hari ke-"+p.day}
+  function freqShort(p){var f=p.freq||"m",n=p.every||1;
+    if(n===1)return f==="d"?"harian":(f==="w"?"mingguan":"bulanan");
+    return n+(f==="d"?" hari":(f==="w"?" minggu":" bulan"))+" sekali"}
+  function monthlyEq(p){var f=p.freq||"m",n=p.every||1;return f==="d"?p.amount*30.4/n:(f==="w"?p.amount*52/12/n:p.amount/n)}
+  function navFor(f,date){if(f.key&&H.d.length&&date>=H.d[0]){var v=navOn(f.key,date);if(v!=null)return v}return f.nav}
   function recordDca(f){
-    if(!pending(f)||!(f.nav>0))return false;
-    var p=f.plan,d=dcaDates(p,today());
-    f.entries.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),date:today(),amount:p.amount,price:f.nav,units:p.amount/f.nav,src:"dca"});
-    p.last=d[d.length-1];return true;
+    var l=dueList(f);if(!l.length||!(f.nav>0))return false;
+    l.forEach(function(d){var pr=navFor(f,d);f.entries.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),date:d,amount:f.plan.amount,price:pr,units:f.plan.amount/pr,src:"dca"})});
+    f.entries.sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0)});
+    f.plan.last=l[l.length-1];return true;
   }
   function dcaHtml(f){
-    var p=f.plan,cu=f.cur||"MYR";
-    if(!p)return'<div class="dca"><b>Pelan DCA bulanan</b><form data-plan="'+f.id+'" onsubmit="return false"><div class="two"><label>Jumlah sebulan<input name="amount" type="number" step="any" min="0" inputmode="decimal" placeholder="cth. 200"></label><label>Hari (1-28)<input name="day" type="number" min="1" max="28" inputmode="numeric" value="'+Math.min(28,new Date().getDate())+'"></label></div><label>Bermula<input name="start" type="date" value="'+today()+'"></label><button type="button" data-act="plan" data-id="'+f.id+'">Simpan pelan DCA</button></form></div>';
-    var d=dcaDates(p,today()),pend=pending(f);
-    return'<div class="dca"><b>Pelan DCA bulanan</b><div class="sub">'+money(p.amount,cu)+' pada hari ke-'+p.day+' setiap bulan'+(d.next?' · seterusnya '+dmy(d.next):'')+'</div>'+
-      (pend?'<button class="primary" style="margin-top:8px" data-act="dca" data-id="'+f.id+'"'+(f.nav>0?'':' disabled')+'>Rekod DCA: '+money(p.amount,cu)+' @ NAV '+(f.nav?f.nav.toFixed(4):"?")+'</button>':'<div class="sub">Tiada DCA tertunggak.</div>')+
-      '<div><button class="x" data-act="rmplan" data-id="'+f.id+'">Padam pelan</button></div></div>';
+    var p=f.plan||{},cu=f.cur||"MYR",fr=f.plan?(p.freq||"m"):"",n=p.every||1,l=dueList(f),nx=f.plan?dcaDates(f.plan,today()).next:"";
+    var h='<div class="dca"><b>Pelan DCA</b>';
+    if(f.plan){
+      h+='<div class="sub">'+money(p.amount,cu)+' '+freqText(p)+(nx?' · seterusnya '+dmy(nx):'')+'</div>';
+      h+=l.length?'<div style="margin-top:8px;display:grid;gap:6px;grid-template-columns:1fr 1fr"><button class="primary" data-act="dca" data-id="'+f.id+'"'+(f.nav>0?'':' disabled')+'>Rekod '+l.length+' pembelian ('+money(p.amount*l.length,cu)+')</button><button data-act="skip" data-id="'+f.id+'">Langkau</button></div><div class="sub">Setiap pembelian guna NAV pada tarikh berkenaan jika ada sejarah harga, jika tidak NAV terkini.</div>':'<div class="sub">Tiada DCA tertunggak.</div>';
+    }else h+='<div class="sub">Tanpa DCA. Pilih kekerapan di bawah untuk menjadualkan pelaburan berkala.</div>';
+    function op(v,t){return'<option value="'+v+'"'+(fr===v?" selected":"")+'>'+t+'</option>'}
+    h+='<form data-plan="'+f.id+'" onsubmit="return false" style="margin-top:10px"><label>Kekerapan<select name="freq" style="margin-top:0">'+op("","Tanpa DCA")+op("d","Harian")+op("w","Mingguan")+op("m","Bulanan")+'</select></label>'+
+      '<div class="two"><label>Selang (2 = setiap 2 kali)<input name="every" type="number" min="1" max="60" inputmode="numeric" value="'+n+'"></label><label>Jumlah ('+cu+')<input name="amount" type="number" step="any" min="0" inputmode="decimal" value="'+(p.amount||"")+'" placeholder="cth. 200"></label></div>'+
+      '<div class="two"><label>Hari dalam bulan (1-28, bulanan)<input name="day" type="number" min="1" max="28" inputmode="numeric" value="'+(p.day||Math.min(28,new Date().getDate()))+'"></label><label>Bermula<input name="start" type="date" value="'+(p.start||today())+'"></label></div>'+
+      '<button type="button" data-act="plan" data-id="'+f.id+'">Simpan pelan</button></form></div>';
+    return h;
+  }
+  function srcHtml(f){
+    if(!f.entries.length)return"";var cu=f.cur;
+    return'<div class="stats" style="grid-template-columns:1fr 1fr;padding-top:0">'+[["dca","DCA"],["lump","Sekali gus"]].map(function(x){
+      var inv=0,u=0;f.entries.forEach(function(e){if((e.src==="dca")===(x[0]==="dca")){inv+=e.amount;u+=e.units}});
+      var v=u*(f.nav||0);return'<div>'+x[1]+'<b>'+(inv?money(inv,cu)+' · '+pc((v-inv)/inv*100):"–")+'</b></div>'}).join("")+'</div>';
   }
 
   function render(){
@@ -169,22 +195,22 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
     el.textContent=ti?(p>=0?"+":"-")+money(Math.abs(p))+" ("+pct(p/ti*100)+")":"Belum ada pelaburan";
     el.className="pl "+(p>=0?"up":"down");
     var pc=0,commit=0;
-    S.funds.forEach(function(f){if(f.plan){if(!f.cur||f.cur==="MYR")commit+=f.plan.amount;if(pending(f)&&f.nav>0)pc++}});
-    $("dcaInfo").textContent=commit?"Komitmen DCA: "+money(commit)+" sebulan":"";
-    $("banner").innerHTML=pc?'<div class="banner"><span>'+pc+' pembelian DCA tertunggak (guna NAV terkini)</span><button class="primary" id="dcaAll">Rekod semua</button></div>':"";
+    S.funds.forEach(function(f){if(f.plan){if(!f.cur||f.cur==="MYR")commit+=monthlyEq(f.plan);if(pending(f)&&f.nav>0)pc++}});
+    $("dcaInfo").textContent=commit?"Anggaran komitmen DCA: "+money(commit)+" sebulan":"";
+    $("banner").innerHTML=pc?'<div class="banner"><span>'+pc+' dana ada DCA tertunggak</span><button class="primary" id="dcaAll">Rekod semua</button></div>':"";
     if(pc)$("dcaAll").onclick=function(){S.funds.forEach(recordDca);save();render()};
     if(!S.funds.length){$("list").innerHTML='<div class="empty">Belum ada dana. Tekan <b>Tambah dana</b> dan cari dana daripada mana-mana syarikat unit amanah.</div>';return}
     S.funds.forEach(function(f){
       var c=calc(f),cls=c.pl>=0?"up":"down",cu=f.cur;
       h+='<details class="fund" data-id="'+f.id+'"'+(open[f.id]?" open":"")+'><summary><div class="row"><span class="name">'+esc(f.name)+'</span><span class="val">'+money(c.val,cu)+'</span></div>'+
-      '<div class="co">'+esc(f.company||"Dana manual")+(f.plan?'<span class="chip">DCA '+money(f.plan.amount,cu)+(pending(f)?' · tertunggak':'')+'</span>':'')+'</div>'+
+      '<div class="co">'+esc(f.company||"Dana manual")+(f.plan?'<span class="chip">DCA '+money(f.plan.amount,cu)+' '+freqShort(f.plan)+(pending(f)?' · tertunggak':'')+'</span>':'')+'</div>'+
       '<div class="sub"><span class="'+cls+'">'+(c.inv?pct(c.pp):"–")+'</span> · NAV '+(f.nav?f.nav.toFixed(4):"belum ada")+(f.navDate?" ("+dmy(f.navDate)+")":"")+(f.status?" · "+esc(stm(f.status)):"")+'</div></summary>'+
-      '<div class="stats"><div>Modal<b>'+money(c.inv,cu)+'</b></div><div>Unit<b>'+c.u.toFixed(2)+'</b></div><div>Purata kos<b>'+c.avg.toFixed(4)+'</b></div></div>'+
+      '<div class="stats"><div>Modal<b>'+money(c.inv,cu)+'</b></div><div>Unit<b>'+c.u.toFixed(2)+'</b></div><div>Purata kos<b>'+c.avg.toFixed(4)+'</b></div></div>'+srcHtml(f)+
       '<div class="body">'+(f.key?'':'<form data-nav="'+f.id+'" onsubmit="return false"><div class="two"><label>NAV (manual)<input name="nav" type="number" step="any" min="0" inputmode="decimal" value="'+(f.nav||"")+'"></label><button type="button" data-act="nav" data-id="'+f.id+'" style="align-self:end">Kemas kini</button></div></form>')+
-      dcaHtml(f)+'<form data-buy="'+f.id+'" onsubmit="return false"><div class="two"><label>Tarikh<input name="date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><label>Jumlah ('+(cu||"MYR")+')<input name="amount" type="number" step="any" min="0" inputmode="decimal" placeholder="cth. 200"></label></div>'+
+      dcaHtml(f)+'<div class="dca" style="border-top:1px solid var(--line)"><b>Pelaburan sekali gus</b></div><form data-buy="'+f.id+'" onsubmit="return false"><div class="two"><label>Tarikh<input name="date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><label>Jumlah ('+(cu||"MYR")+')<input name="amount" type="number" step="any" min="0" inputmode="decimal" placeholder="cth. 200"></label></div>'+
       '<label>NAV pembelian<input name="price" type="number" step="any" min="0" inputmode="decimal" value="'+(f.nav||"")+'"></label>'+
-      '<button type="button" class="primary" data-act="buy" data-id="'+f.id+'">Tambah pembelian</button></form>'+
-      f.entries.slice().reverse().map(function(e){return'<div class="ent"><div>'+esc(e.date)+(e.src==="dca"?'<span class="chip">DCA</span>':'')+'<small>'+e.units.toFixed(2)+' unit @ '+e.price.toFixed(4)+'</small></div><div>'+money(e.amount,cu)+' <button class="x" data-act="del" data-id="'+f.id+'" data-e="'+e.id+'">Padam</button></div></div>'}).join("")+
+      '<button type="button" class="primary" data-act="buy" data-id="'+f.id+'">Rekod pelaburan sekali gus</button></form>'+
+      f.entries.slice().reverse().map(function(e){return'<div class="ent"><div>'+esc(e.date)+(e.src==="dca"?'<span class="chip">DCA</span>':'<span class="chip">Sekali gus</span>')+'<small>'+e.units.toFixed(2)+' unit @ '+e.price.toFixed(4)+'</small></div><div>'+money(e.amount,cu)+' <button class="x" data-act="del" data-id="'+f.id+'" data-e="'+e.id+'">Padam</button></div></div>'}).join("")+
       '<div style="margin-top:12px"><button class="x" data-act="rmfund" data-id="'+f.id+'">Padam dana ini</button></div></div></details>';
     });
     $("list").innerHTML=h;
@@ -212,13 +238,15 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
     if(a==="nav"){var v=parseFloat(document.querySelector('[data-nav="'+f.id+'"] [name=nav]').value);if(v>0){f.nav=v;f.navDate="";save();render()}}
     if(a==="buy"){var q=document.querySelector('[data-buy="'+f.id+'"]'),amt=parseFloat(q.amount.value),pr=parseFloat(q.price.value);
       if(!(amt>0&&pr>0)){alert("Isi jumlah dan NAV dengan nombor lebih daripada 0.");return}
-      f.entries.push({id:String(Date.now()),date:q.date.value,amount:amt,price:pr,units:amt/pr});
+      f.entries.push({id:String(Date.now()),date:q.date.value,amount:amt,price:pr,units:amt/pr,src:"lump"});f.entries.sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0)});
       if(!f.nav)f.nav=pr;save();render()}
     if(a==="del"){f.entries=f.entries.filter(function(x){return x.id!==b.dataset.e});save();render()}
-    if(a==="plan"){var q2=document.querySelector('[data-plan="'+f.id+'"]'),am=parseFloat(q2.amount.value),dy=parseInt(q2.day.value,10),st=q2.start.value;
-      if(!(am>0&&dy>=1&&dy<=28&&st)){alert("Isi jumlah, hari (1-28) dan tarikh mula.");return}
-      f.plan={amount:am,day:dy,start:st,last:""};var dd=dcaDates(f.plan,today());f.plan.last=dd.length?dd[dd.length-1]:"";save();render()}
-    if(a==="rmplan"&&confirm("Padam pelan DCA untuk dana ini?")){delete f.plan;save();render()}
+    if(a==="plan"){var q2=document.querySelector('[data-plan="'+f.id+'"]'),fr=q2.freq.value;
+      if(!fr){delete f.plan;save();render();return}
+      var am=parseFloat(q2.amount.value),dy=parseInt(q2.day.value,10),ev=parseInt(q2.every.value,10)||1,st=q2.start.value;
+      if(!(am>0&&dy>=1&&dy<=28&&st&&ev>=1)){alert("Isi jumlah, selang, hari (1-28) dan tarikh mula.");return}
+      f.plan={amount:am,freq:fr,every:ev,day:dy,start:st,last:""};var dd=dcaDates(f.plan,today());f.plan.last=dd.length?dd[dd.length-1]:"";save();render()}
+    if(a==="skip"&&f.plan){var l2=dueList(f);if(l2.length){f.plan.last=l2[l2.length-1];save();render()}}
     if(a==="dca"&&recordDca(f)){save();render()}
     if(a==="rmfund"&&confirm("Padam "+f.name+" dan semua rekodnya?")){S.funds=S.funds.filter(function(x){return x!==f});save();render()}
   });
@@ -350,7 +378,12 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   $("cmpChips").onclick=function(e){var a=e.target.closest("a[data-rm]");if(a){S.cmp=S.cmp.filter(function(k){return k!==a.dataset.rm});save();renderCmp()}};
   $("cmpAdd").onclick=function(){mode="cmp";$("q").value="";$("res").innerHTML="";$("dlg").showModal();$("q").focus()};
 
-  function dcaOn(p,iso){return+iso.slice(8)===p.day&&iso>=p.start}
+  function dcaOn(p,iso){
+    var f=p.freq||"m",n=p.every||1;
+    if(iso<p.start)return false;
+    if(f==="m"){var a=p.start.split("-"),b=iso.split("-"),md=(+b[0]-+a[0])*12+(+b[1]-+a[1]);return+b[2]===p.day&&md>=0&&md%n===0}
+    return(dayNum(iso)-dayNum(p.start))%(n*(f==="w"?7:1))===0;
+  }
   function unitsAt(f,date){var u=0;f.entries.forEach(function(e){if(e.date<=date)u+=e.units});return u}
   function dayMove(date){
     var i=H.d.indexOf(date);if(i<1)return null;var pd=H.d[i-1],ch=0,val=0,has=false;
