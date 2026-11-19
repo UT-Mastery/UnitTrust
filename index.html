@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>DCA UT-racking</title>
+<title>UTrack</title>
 <meta name="theme-color" content="#1f6f5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="DCA UT-racking">
+<meta name="apple-mobile-web-app-title" content="UTrack">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -43,7 +43,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}h2{margin:0 0 10px;font-size:18px}
 #res button{display:block;width:100%;text-align:left;margin-bottom:6px;font-size:14px}
 #res small{color:var(--mute);display:block}
 .note{font-size:12px;color:var(--mute);margin-top:18px;text-align:center}
-.logo{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;background:#39ff14;color:#082008;font-weight:800;font-size:12px;margin-right:8px;vertical-align:middle}
+.logo{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;background:#39ff14;color:#082008;font-weight:800;font-size:12px;margin-right:2px;vertical-align:middle}
 #tabs{display:flex;gap:6px;margin:10px 0 14px}
 #tabs button{flex:1;min-height:40px;padding:6px 2px;font-size:13px}
 #tabs button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
@@ -65,7 +65,7 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
 </head>
 <body>
 <main>
-  <h1><span class="logo">UT</span>DCA UT-racking</h1>
+  <h1 aria-label="UTrack"><span class="logo">UT</span>rack</h1>
   <div id="tabs"><button data-tab="port" class="on">Pelaburan</button><button data-tab="price">Harga</button><button data-tab="cal">Kalendar</button><button data-tab="cmp">Banding</button><button data-tab="epf">KWSP</button></div>
   <div id="t-port" class="tab">
   <div class="total" id="total">RM 0.00</div>
