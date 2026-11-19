@@ -65,7 +65,7 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
 <body>
 <main>
   <h1>Jejak DCA</h1>
-  <div id="tabs"><button data-tab="port" class="on">Portfolio</button><button data-tab="price">Harga</button><button data-tab="cal">Kalendar</button><button data-tab="cmp">Banding</button></div>
+  <div id="tabs"><button data-tab="port" class="on">Portfolio</button><button data-tab="price">Prices</button><button data-tab="cal">Calendar</button><button data-tab="cmp">Compare</button></div>
   <div id="t-port" class="tab">
   <div class="total" id="total">RM 0.00</div>
   <div class="sub"><span class="pl" id="pl">–</span> · modal <span id="inv">RM 0.00</span> <span>(dana RM sahaja)</span></div><div class="sub" id="dcaInfo"></div>
@@ -77,6 +77,9 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
 <div id="t-price" class="tab" hidden>
   <input id="pq" placeholder="Cari nama dana atau syarikat…" autocomplete="off">
   <select id="pco"></select>
+  <div class="two"><select id="pty"><option value="">Semua jenis</option><option value="s">Shariah</option><option value="c">Konvensional</option></select><select id="pep"><option value="">Semua skim</option><option value="1">Layak KWSP (EPF-MIS)</option></select></div>
+  <button id="impBtn" style="width:100%;margin-top:8px">Import senarai KWSP / jenis dana</button>
+  <div class="note" style="margin:8px 0;text-align:left">✓ = disahkan (senarai atau tanda manual) · (nama) = dikesan daripada nama dana · * = andaian jika tiada tanda Shariah. Banyak dana Shariah tiada perkataan "Islamic" dalam nama, jadi sahkan dengan syarikat dana. Ketik ✎ pada dana untuk tanda sendiri.</div>
   <div class="sub" id="pinfo" style="margin:10px 0"></div>
   <div id="plist"></div>
   <button id="pmore" hidden style="width:100%">Papar lagi</button>
@@ -105,6 +108,7 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   <button id="close">Tutup</button>
 </dialog>
 <dialog id="dlg2"><h2>Sandaran data</h2><p class="sub">Salin teks ini dan simpan di Nota. Untuk pulih atau pindah ke telefon lain, tampal di sini dan tekan Pulihkan.</p><textarea id="bk" rows="8"></textarea><div class="two" style="margin-top:8px"><button id="bkCopy">Salin</button><button id="bkRestore" class="primary">Pulihkan</button></div><button id="bkClose" style="margin-top:8px;width:100%">Tutup</button></dialog>
+<dialog id="dlg3"><h2>Import senarai</h2><p class="sub">Salin senarai dana yang layak KWSP (EPF-MIS) daripada laman syarikat dana atau KWSP, kemudian tampal di sini. Jika ada lajur Islamic/Conventional, jenis dana turut ditanda.</p><textarea id="impTxt" rows="8"></textarea><div id="impRes" class="sub" style="margin:8px 0"></div><div class="two"><button id="impClose">Tutup</button><button id="impRun" class="primary">Padankan</button></div></dialog>
 <script>
 (function(){
   if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
@@ -185,7 +189,7 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
         f.cur=q.cur;f.status=q.s||"";if(q.p){f.nav=q.p;f.navDate=d.asOf}});
       save();
       setStatus("NAV FIMM bertarikh "+dmy(d.asOf)+" · disemak "+new Date().toLocaleTimeString("ms-MY",{hour:"2-digit",minute:"2-digit"})+(miss?" · "+miss+" dana tiada dalam senarai FIMM":""));
-    }).catch(function(){setStatus("Tak dapat ambil harga baharu. Guna NAV terakhir yang disimpan.")}).then(function(){render();loadHist()});
+    }).catch(function(){setStatus("Tak dapat ambil harga baharu. Guna NAV terakhir yang disimpan.")}).then(function(){render();loadHist();loadTags()});
   }
 
   $("refresh").onclick=load;
@@ -230,6 +234,23 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   var COLORS=["#1f6f5c","#d1495b","#edae49","#00798c","#66a182","#8d5a97","#30638e","#c1666b","#6c757d","#e08d3c"];
   var MN=["Januari","Februari","Mac","April","Mei","Jun","Julai","Ogos","September","Oktober","November","Disember"];
   S.cmp=S.cmp||[];
+  S.tags=S.tags||{};var R={epf:{},shariah:{},conv:{}};
+  function kindOf(k,name){
+    var t=S.tags[k];
+    if(t&&t.s===1)return{v:"s",src:"manual"};
+    if(t&&t.s===0)return{v:"c",src:"manual"};
+    if(R.shariah[k])return{v:"s",src:"list"};
+    if(R.conv[k])return{v:"c",src:"list"};
+    if(/ISLAMIC|SHARIAH|SYARIAH/i.test(name))return{v:"s",src:"nama"};
+    return{v:"c",src:"auto"};
+  }
+  function epfOf(k){var t=S.tags[k];if(t&&t.e!=null)return!!t.e;return!!R.epf[k]}
+  function chipK(kd){var l=kd.v==="s"?(kd.src==="nama"?"Shariah (nama)":"Shariah ✓"):(kd.src==="auto"?"Konvensional*":"Konvensional ✓");return'<span class="chip" style="margin-left:0">'+l+'</span> '}
+  function tagGc(k){var t=S.tags[k];if(t&&t.s==null&&t.e==null)delete S.tags[k]}
+  function cycleS(k){var t=S.tags[k]=S.tags[k]||{};if(t.s==null)t.s=1;else if(t.s===1)t.s=0;else delete t.s;tagGc(k);save()}
+  function cycleE(k){var t=S.tags[k]=S.tags[k]||{};if(t.e==null)t.e=1;else if(t.e===1)t.e=0;else delete t.e;tagGc(k);save()}
+  function loadTags(){return fetch("tags.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(t){["epf","shariah","conv"].forEach(function(n){R[n]={};(t[n]||[]).forEach(function(k){R[n][k]=1})});if(tab==="price")renderPrice()}).catch(function(){})}
+  function norm(s){return s.toUpperCase().replace(/&/g," AND ").replace(/[^A-Z0-9]+/g," ").trim()}
   /*PURE_START*/
   function addDays(iso,n){var d=new Date(iso+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
   function lastIdx(a,upto){for(var i=Math.min(upto===undefined?a.length-1:upto,a.length-1);i>=0;i--)if(a[i]!=null)return i;return -1}
@@ -260,23 +281,24 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
     var sel=$("pco");
     if(sel._n!==P.funds.length){var cs={};P.funds.forEach(function(f){cs[f.c]=1});sel.innerHTML='<option value="">Semua syarikat</option>'+Object.keys(cs).sort().map(function(c){return'<option>'+esc(c)+'</option>'}).join("");sel._n=P.funds.length}
     var t=$("pq").value.toLowerCase().split(/\s+/).filter(Boolean),co=sel.value,out=[];
-    P.funds.forEach(function(f){if(co&&f.c!==co)return;var s=(f.n+" "+f.c).toLowerCase();if(t.every(function(w){return s.indexOf(w)>-1}))out.push(f)});
+    var ty=$("pty").value,ep=$("pep").value;
+    P.funds.forEach(function(f){if(co&&f.c!==co)return;var kq=f.c+"|"+f.n;if(ty&&kindOf(kq,f.n).v!==ty)return;if(ep&&!epfOf(kq))return;var s=(f.n+" "+f.c).toLowerCase();if(t.every(function(w){return s.indexOf(w)>-1}))out.push(f)});
     P._out=out;$("pinfo").textContent=out.length+" dana · NAV FIMM "+(P.asOf?dmy(P.asOf):"belum dimuat");
     var h="";
     out.slice(0,pShown).forEach(function(f,i){
-      var r=rets(f.c+"|"+f.n),tr=S.funds.some(function(x){return x.key===f.c+"|"+f.n});
-      h+='<div class="fund" style="padding:10px 14px"><div class="row"><span class="name">'+esc(f.n)+'</span><span class="val">'+(f.p?f.p.toFixed(4):esc(f.s||"–"))+'</span></div><div class="co">'+esc(f.c)+' · '+f.cur+(r.d1!=null?' · '+pc(r.d1):'')+'</div>'+
-      '<div style="margin-top:8px;display:flex;gap:6px"><button data-pi="'+i+'" data-pa="track"'+(tr?' disabled':'')+'>'+(tr?'✓ Dijejak':'+ Jejak')+'</button><button data-pi="'+i+'" data-pa="cmp">⇄ Banding</button></div></div>';
+      var kk=f.c+"|"+f.n,kd=kindOf(kk,f.n),r=rets(kk),tr=S.funds.some(function(x){return x.key===f.c+"|"+f.n});
+      h+='<div class="fund" style="padding:10px 14px"><div class="row"><span class="name">'+esc(f.n)+'</span><span class="val">'+(f.p?f.p.toFixed(4):esc(f.s||"–"))+'</span></div><div class="co">'+esc(f.c)+' · '+f.cur+(r.d1!=null?' · '+pc(r.d1):'')+'</div><div style="margin-top:4px">'+chipK(kd)+(epfOf(kk)?'<span class="chip">KWSP</span>':'')+'</div>'+
+      '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button data-pi="'+i+'" data-pa="track"'+(tr?' disabled':'')+'>'+(tr?'✓ Dijejak':'+ Jejak')+'</button><button data-pi="'+i+'" data-pa="cmp">⇄ Banding</button><button data-pi="'+i+'" data-pa="tagS">✎ Jenis</button><button data-pi="'+i+'" data-pa="tagE">✎ KWSP</button></div></div>';
     });
     $("plist").innerHTML=h||'<div class="empty">Tiada padanan, atau harga belum dimuat.</div>';
     $("pmore").hidden=out.length<=pShown;
   }
-  $("pq").oninput=function(){renderPrice(1)};$("pco").onchange=function(){renderPrice(1)};
+  $("pq").oninput=function(){renderPrice(1)};$("pco").onchange=function(){renderPrice(1)};$("pty").onchange=function(){renderPrice(1)};$("pep").onchange=function(){renderPrice(1)};
   $("pmore").onclick=function(){pShown+=60;renderPrice()};
   $("plist").onclick=function(e){
     var b=e.target.closest("button[data-pi]");if(!b)return;var f=P._out[+b.dataset.pi];if(!f)return;
     if(b.dataset.pa==="track"){if(trackFund(f)){b.textContent="✓ Dijejak";b.disabled=true}}
-    else{addCmp(f.c+"|"+f.n);b.textContent="✓ Dalam banding ("+S.cmp.length+")"}
+    else if(b.dataset.pa==="tagS"){cycleS(f.c+"|"+f.n);renderPrice()}else if(b.dataset.pa==="tagE"){cycleE(f.c+"|"+f.n);renderPrice()}else{addCmp(f.c+"|"+f.n);b.textContent="✓ Dalam banding ("+S.cmp.length+")"}
   };
 
   function renderCmp(){
@@ -352,6 +374,27 @@ textarea{font:12px/1.3 ui-monospace,monospace;color:var(--ink);background:var(--
   $("cprev").onclick=function(){cal.m--;if(cal.m<0){cal.m=11;cal.y--}renderCal()};
   $("cnext").onclick=function(){cal.m++;if(cal.m>11){cal.m=0;cal.y++}renderCal()};
 
+  $("impBtn").onclick=function(){$("impRes").textContent="";$("dlg3").showModal()};
+  $("impClose").onclick=function(){$("dlg3").close()};
+  $("impRun").onclick=function(){
+    if(!P.funds.length){$("impRes").textContent="Harga belum dimuat. Cuba lagi sebentar.";return}
+    var idx=P.funds.map(function(f){return[f,norm(f.n)]}),rows=0,funds=0,miss=[];
+    $("impTxt").value.split("\n").forEach(function(l){
+      var cells=l.split(/\t|\s{2,}|\|/).map(function(x){return x.trim()}).filter(Boolean),ci=0;
+      while(ci<cells.length&&!/[A-Za-z]{3}/.test(cells[ci]))ci++;
+      if(ci>=cells.length)return;
+      var name=cells[ci].replace(/^[\d\s.\)\-•*]+/,"").trim(),rest=cells.slice(ci+1).join(" "),
+          s=/Islamic|Shariah|Syariah/i.test(rest)?1:(/Conventional|Konvensional/i.test(rest)?0:null),nn=norm(name);
+      if(nn.length<5||/^(FUND NAME|NAMA|CATEGORY|NO )/.test(nn))return;
+      var m=idx.filter(function(x){return x[1].indexOf(nn)===0});
+      if(!m.length)m=idx.filter(function(x){return x[1].indexOf(nn)>-1});
+      if(!m.length){miss.push(name);return}
+      rows++;
+      m.forEach(function(x){var k=x[0].c+"|"+x[0].n,t=S.tags[k]=S.tags[k]||{};t.e=1;if(s!==null)t.s=s;funds++});
+    });
+    save();renderPrice();
+    $("impRes").textContent=rows+" baris dipadankan kepada "+funds+" dana (semua kelas dana yang sama nama). "+(miss.length?"Tidak dijumpai ("+miss.length+"): "+miss.slice(0,12).join("; ")+(miss.length>12?"…":""):"");
+  };
   $("backup").onclick=function(){$("bk").value=JSON.stringify(S);$("dlg2").showModal()};
   $("bkCopy").onclick=function(){$("bk").select();try{navigator.clipboard.writeText($("bk").value)}catch(e){document.execCommand("copy")}};
   $("bkRestore").onclick=function(){try{var o=JSON.parse($("bk").value);if(!o||!Array.isArray(o.funds))throw 0;
