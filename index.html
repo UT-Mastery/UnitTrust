@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>UTrack</title>
-<meta name="theme-color" content="#0b7a5a">
+<meta name="theme-color" content="#1e40af">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,8 +13,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#f4f6f9;--surface:#fff;--ink:#0f1b2d;--mute:#5a6b80;--line:#e3e8ef;--accent:#0b7a5a;--accent-soft:#e3f4ee;--on-accent:#fff;--gain:#0a7a52;--loss:#c93b3b;--hero-a:#0b7a5a;--hero-b:#075e45;--shadow:0 1px 2px rgba(15,27,45,.06),0 6px 18px rgba(15,27,45,.06);box-sizing:border-box}
-@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--surface:#131c2e;--ink:#e8eef7;--mute:#93a1b5;--line:#243049;--accent:#34d399;--accent-soft:#12302a;--on-accent:#06251b;--gain:#4ade9f;--loss:#ff8a8a;--hero-a:#0f5f49;--hero-b:#0a3f31;--shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3)}}
+:root{--bg:#f3f6fc;--surface:#fff;--ink:#0b1b3a;--mute:#53627f;--line:#dde5f3;--accent:#1d4ed8;--accent-soft:#e6eeff;--on-accent:#fff;--gain:#0a7a52;--loss:#d62839;--hl:#ffd43b;--hl-soft:#fff6cc;--hero-a:#1e4fd8;--hero-b:#0b2a8a;--shadow:0 1px 2px rgba(11,27,58,.06),0 6px 18px rgba(11,27,58,.08);box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--bg:#0a1226;--surface:#121c36;--ink:#e9eefb;--mute:#9aa9c7;--line:#22304f;--accent:#6ea8ff;--accent-soft:#15294f;--on-accent:#061330;--gain:#4ade9f;--loss:#ff7a85;--hl:#ffd43b;--hl-soft:#3a3210;--hero-a:#1e4fd8;--hero-b:#0a2a7a;--shadow:0 1px 2px rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.35)}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
@@ -25,7 +25,7 @@ main{max-width:600px;margin:0 auto;padding:14px 16px calc(92px + env(safe-area-i
 h2{margin:0 0 10px;font-size:17px;font-weight:700;letter-spacing:-.01em}
 .sub{color:var(--mute);font-size:13px}
 .up{color:var(--gain)}.down{color:var(--loss)}
-.hero{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:#fff;border-radius:20px;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:#fff;border-radius:20px;border-bottom:4px solid var(--hl);box-shadow:var(--shadow)}
 .hero .lbl{font-size:13px;opacity:.85}
 .hero .total{font-size:36px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin:4px 0 8px;color:#fff}
 .hero .sub{color:rgba(255,255,255,.82)}
@@ -73,7 +73,7 @@ textarea{font:12px/1.4 ui-monospace,monospace}
 .x{min-height:34px;padding:2px 12px;color:var(--loss);background:transparent;border-color:transparent;font-size:13px}
 .empty{color:var(--mute);text-align:center;padding:36px 14px;border:1px dashed var(--line);border-radius:16px}
 .chip{display:inline-block;background:var(--accent-soft);color:var(--accent);border:1px solid transparent;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:600;margin:0 4px 4px 0}
-.banner{background:var(--accent-soft);border:1px solid var(--accent);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.banner{background:var(--hl-soft);color:var(--ink);border:1px solid var(--hl);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .dca{padding:0}
 .note{font-size:12px;color:var(--mute);margin-top:18px;text-align:center;line-height:1.5}
 .pills{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin:0 -2px}
@@ -82,6 +82,14 @@ textarea{font:12px/1.4 ui-monospace,monospace}
 .epfcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
 .epfamt{font-size:34px;font-weight:700;letter-spacing:-.03em;margin:4px 0}
 .epfcard .stats{padding:10px 0 0}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:linear-gradient(90deg,var(--accent) 0 62%,#e11d2e 62% 86%,var(--hl) 86% 100%)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.card .stats{padding:10px 0 0}
+.amt{font-size:34px;font-weight:700;letter-spacing:-.03em;margin:4px 0}
+.chk{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);margin-top:12px}
+.chk input{width:22px;height:22px;min-height:0;padding:0;accent-color:var(--accent)}
+tr.me td{background:var(--accent-soft)}
+.note p{margin:0 0 8px}
 #eOut{overflow-x:auto}
 #eOut th{white-space:normal}
 .scroll{overflow-x:auto;margin:6px 0}
@@ -100,8 +108,9 @@ tr[style*="accent-soft"] td:first-child{background:var(--accent-soft)}
 dialog{border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);width:min(94vw,460px);padding:18px;box-shadow:var(--shadow)}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 #tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
-#tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:50px;padding:4px 0;border:0;background:none;color:var(--mute);font-size:11px;font-weight:500;border-radius:10px}
+#tabs button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:50px;padding:4px 0;border:0;background:none;color:var(--mute);font-size:11px;font-weight:500;border-radius:10px}
 #tabs button.on{color:var(--accent);font-weight:700}
+#tabs button.on::before{content:"";position:absolute;top:-6px;left:50%;width:30px;height:3px;margin-left:-15px;border-radius:0 0 3px 3px;background:var(--hl)}
 #tabs svg{width:22px;height:22px}
 </style>
 </head>
@@ -149,18 +158,34 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   <div class="note" id="cmpNote"></div>
 </div>
 <div id="t-epf" class="tab" hidden>
-  <h2>Kalkulator SPA KWSP 2026–2030</h2>
-  <details class="sec" open><summary><b>Maklumat dan pilihan tahun</b></summary>
-  <div class="two"><label>Umur<input id="eAge" type="number" min="18" max="70" inputmode="numeric" placeholder="cth. 35"></label><label>Baki Akaun Persaraan (RM)<input id="eBal" type="number" min="0" step="any" inputmode="decimal" placeholder="cth. 80000"></label></div>
-  <div class="sub" style="margin:12px 0 6px">Pilih tahun untuk dipaparkan</div>
-  <div class="pills" id="eYears"></div>
+  <details class="sec" open>
+    <summary><b>Maklumat anda</b></summary>
+    <div class="two">
+      <label>Umur pada 2026<input id="eAge" type="number" min="18" max="70" inputmode="numeric" placeholder="cth. 35"></label>
+      <label>Baki Akaun Persaraan (RM)<input id="eBal" type="number" min="0" step="any" inputmode="decimal" placeholder="cth. 80000"></label>
+    </div>
+    <label class="chk"><input id="eGrow" type="checkbox"> Umur bertambah 1 tahun setiap tahun</label>
+    <div class="sub" style="margin:14px 0 6px">Pilih tahun untuk dipaparkan</div>
+    <div class="pills" id="eYears"></div>
   </details>
-  <details class="sec" open><summary><b>Hasil kiraan</b></summary>
-  <div id="eOut"></div>
-  <button id="eFunds" style="width:100%;margin-top:10px">Lihat dana layak KWSP</button>
+  <details class="sec" open>
+    <summary><b>Hasil kiraan</b></summary>
+    <div id="eOut"></div>
+    <button id="eFunds" style="width:100%">Lihat dana layak KWSP</button>
   </details>
-  <details class="sec" style="margin-top:14px"><summary><b>Jadual Simpanan Asas mengikut umur (RM)</b></summary><div class="scroll" id="eTbl" style="max-height:55vh;overflow-y:auto"></div></details>
-  <div class="note" style="text-align:left">Formula: (Baki Akaun Persaraan − Simpanan Asas) × 30%, minimum RM1,000, untuk ahli di bawah umur 55. Lajur 2026 diambil daripada laman i-Invest KWSP. Lajur 2027 hingga 2030 diambil daripada jadual yang disiarkan oleh pengurus dana (Hong Leong AM) berdasarkan jadual KWSP, dan angka 2030 disemak dengan jadual KWSP Disember 2024. Sahkan angka anda dalam i-Akaun sebelum membuat keputusan. Pelaburan unit amanah mempunyai risiko dan ini bukan nasihat kewangan.</div>
+  <details class="sec">
+    <summary><b>Jadual Simpanan Asas mengikut umur (RM)</b></summary>
+    <div class="scroll" id="eTbl" style="max-height:60vh;overflow-y:auto"></div>
+  </details>
+  <details class="sec">
+    <summary><b>Cara kiraan dan nota</b></summary>
+    <div class="note" style="text-align:left;margin-top:0;font-size:13px;line-height:1.6">
+      <p><b>Formula:</b> (Baki Akaun Persaraan − Simpanan Asas) × 30%. Jumlah minimum yang boleh dilaburkan ialah RM1,000.</p>
+      <p>Kalkulator ini untuk ahli KWSP berumur 18 hingga 54 tahun. Umur 55 tahun ke atas mempunyai peraturan berbeza.</p>
+      <p><b>Sumber angka:</b> lajur 2026 diambil daripada laman i-Invest KWSP. Lajur 2027 hingga 2030 diambil daripada jadual yang disiarkan oleh pengurus dana (Hong Leong AM) berdasarkan jadual KWSP, dan angka 2030 disemak dengan jadual KWSP Disember 2024. Angka boleh dikemas kini oleh KWSP, jadi sahkan angka anda dalam i-Akaun sebelum membuat keputusan.</p>
+      <p>Pelaburan unit amanah mempunyai risiko. Kalkulator ini hanya anggaran dan bukan nasihat kewangan.</p>
+    </div>
+  </details>
 </div>
 </main>
 <nav id="tabs">
@@ -178,6 +203,24 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 </dialog>
 <dialog id="dlg2"><h2>Sandaran data</h2><p class="sub">Salin teks ini dan simpan di Nota. Untuk pulih atau pindah ke telefon lain, tampal di sini dan tekan Pulihkan.</p><textarea id="bk" rows="8"></textarea><div class="two" style="margin-top:8px"><button id="bkCopy">Salin</button><button id="bkRestore" class="primary">Pulihkan</button></div><button id="bkClose" style="margin-top:8px;width:100%">Tutup</button></dialog>
 <dialog id="dlg3"><h2>Impor senarai</h2><p class="sub">Salin senarai dana yang layak SPA KWSP (Skim Pelaburan Ahli) daripada laman syarikat dana atau KWSP, kemudian tampal di sini. Jika ada lajur jenis dana (Islamik atau Konvensional), jenis turut ditanda.</p><textarea id="impTxt" rows="8"></textarea><div id="impRes" class="sub" style="margin:8px 0"></div><div class="two"><button id="impClose">Tutup</button><button id="impRun" class="primary">Padankan</button></div></dialog>
+<script>
+(function(){
+  function fit(){
+    try{
+      var b=document.body,sc=window.screen||{},w=sc.width||0,h=sc.height||0;
+      if(!b||!w||!h)return;
+      var port=window.matchMedia("(orientation: portrait)").matches;
+      var target=port?Math.min(w,h):Math.max(w,h);
+      var r=window.innerWidth/target;
+      var coarse=window.matchMedia("(pointer: coarse)").matches;
+      b.style.zoom=(coarse&&r>1.25)?String(Math.min(r,3.5)):"";
+    }catch(e){}
+  }
+  window.addEventListener("resize",fit);
+  window.addEventListener("orientationchange",function(){setTimeout(fit,250)});
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fit);else fit();
+})();
+</script>
 <script>
 (function(){
   if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
@@ -332,7 +375,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   $("addFund").onclick=function(){mode="track";$("q").value="";$("res").innerHTML="";$("dlg").showModal();$("q").focus()};
   $("close").onclick=function(){$("dlg").close()};
   var H={d:[],s:{}},tab="port",mode="track",cmpSort="y1",pShown=60,nowD=new Date(),cal={y:nowD.getFullYear(),m:nowD.getMonth(),sel:today()};
-  var COLORS=["#1f6f5c","#d1495b","#edae49","#00798c","#66a182","#8d5a97","#30638e","#c1666b","#6c757d","#e08d3c"];
+  var COLORS=["#1d4ed8","#e11d2e","#f59e0b","#0ea5a4","#7c3aed","#16a34a","#db2777","#475569","#0284c7","#b45309"];
   var MN=["Januari","Februari","Mac","April","Mei","Jun","Julai","Ogos","September","Oktober","November","Disember"];
   S.cmp=S.cmp||[];
   S.tags=S.tags||{};var R={epf:{},shariah:{},conv:{},cos:[],coc:[],ipd:[]};
@@ -510,42 +553,46 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   var BSRAW="18:900,1000,1100,1300,1400;19:1100,1300,1400,1500,1700;20:1500,1600,1800,2000,2200;21:1900,2100,2300,2600,2800;22:4000,4400,4900,5300,5800;23:6200,6900,7600,8300,9200;24:8500,9500,10400,11400,12300;25:11000,12300,13500,14700,15900;26:13700,15300,16700,18200,19800;27:16600,18400,20200,22000,23900;28:19600,21800,24000,26100,28300;29:22900,25400,28000,30400,33000;30:26300,29300,32200,35100,38000;31:30000,33400,36800,40000,43400;32:33900,37700,41500,45200,49100;33:38100,42400,46600,50700,55100;34:42400,47200,52000,56600,61400;35:47000,52400,57700,62800,68100;36:51900,57800,63700,69300,75100;37:57000,63500,70000,76100,82600;38:62400,69500,76600,83300,90400;39:68100,75800,83500,90800,98600;40:74000,82400,90800,98800,107000;41:80200,89400,98400,107000,116000;42:86700,96600,106000,115000,125000;43:93600,104000,114000,124000,135000;44:100000,112000,123000,134000,145000;45:108000,120000,132000,144000,156000;46:115000,129000,142000,154000,167000;47:124000,138000,152000,165000,179000;48:132000,147000,162000,176000,191000;49:141000,157000,173000,188000,204000;50:150000,167000,184000,201000,217000;51:160000,178000,196000,214000,231000;52:170000,189000,209000,227000,246000;53:181000,201000,222000,241000,261000;54:192000,213000,235000,256000,277000;55:203000,226000,250000,271000,294000";
   var BS={};BSRAW.split(";").forEach(function(r){var p=r.split(":");BS[+p[0]]=p[1].split(",").map(Number)});
   var EY=[2026,2027,2028,2029,2030],eYear="all";
-  function epfCalc(age,bal){
+  var EWHY={low:"Baki Akaun Persaraan di bawah Simpanan Asas.",min:"Jumlah yang boleh dilaburkan kurang daripada minimum RM1,000.",ok:"Jumlah maksimum yang boleh dilaburkan (30% daripada lebihan).",old:"Umur 55 tahun ke atas mempunyai peraturan berbeza (contohnya Akaun 55). Semak di i-Akaun KWSP.",young:"Umur di bawah 18 tahun belum layak."};
+  function epfCalc(age,bal,grow){
     return EY.map(function(y,i){
-      var b=BS[age][i],sur=bal-b,amt=sur*0.3,st="ok";
-      if(bal<=b)st="low";else if(amt<1000)st="min";
-      return{y:y,basic:b,sur:sur,amt:amt,st:st};
+      var a=grow?age+(y-2026):age,r={y:y,a:a};
+      if(a<18){r.st="young";return r}
+      if(a>=55){r.st="old";return r}
+      r.basic=BS[a][i];r.sur=bal-r.basic;r.amt=r.sur*0.3;
+      r.st=bal<=r.basic?"low":(r.amt<1000?"min":"ok");return r;
     });
   }
-  function epfWhy(st){return st==="low"?"Baki Akaun Persaraan di bawah Simpanan Asas.":(st==="min"?"Jumlah yang boleh dilaburkan kurang daripada minimum RM1,000.":"Jumlah maksimum yang boleh dilaburkan (30% daripada lebihan).")}
   function renderEpf(){
-    if(!renderEpf._i){renderEpf._i=1;S.epf=S.epf||{};if(S.epf.age)$("eAge").value=S.epf.age;if(S.epf.bal!=null)$("eBal").value=S.epf.bal;eYear=S.epf.year||"all"}
-    var age=parseInt($("eAge").value,10),bal=parseFloat($("eBal").value),h="";
-    S.epf={age:age||"",bal:isNaN(bal)?null:bal,year:eYear};save();
+    if(!renderEpf._i){renderEpf._i=1;S.epf=S.epf||{};if(S.epf.age)$("eAge").value=S.epf.age;if(S.epf.bal!=null&&S.epf.bal!=="")$("eBal").value=S.epf.bal;$("eGrow").checked=!!S.epf.grow;eYear=S.epf.year||"all"}
+    var age=parseInt($("eAge").value,10),bal=parseFloat($("eBal").value),grow=!!$("eGrow").checked,h="",ages={};
+    S.epf={age:isNaN(age)?"":age,bal:isNaN(bal)?"":bal,year:eYear,grow:grow};save();
     $("eYears").innerHTML=["all"].concat(EY).map(function(y){return'<button data-y="'+y+'"'+(String(y)===String(eYear)?' class="on"':'')+'>'+(y==="all"?"Semua tahun":y)+'</button>'}).join("");
-    if(!(age>=18)||isNaN(bal)||bal<0){h='<div class="sub">Isi umur dan baki Akaun Persaraan untuk melihat jumlah yang boleh dilaburkan.</div>'}
-    else if(age>=55){h='<div class="epfcard">Umur 55 tahun ke atas mempunyai peraturan berbeza (contohnya Akaun 55 atau Akaun Emas), jadi kalkulator ini hanya untuk umur 18 hingga 54. Semak peraturan terkini di i-Akaun KWSP.</div>'}
+    if(isNaN(age)||age<1||isNaN(bal)||bal<0){h='<div class="sub">Isi umur dan baki Akaun Persaraan untuk melihat jumlah yang boleh dilaburkan.</div>'}
     else{
-      var rows=epfCalc(age,bal);
+      var rows=epfCalc(age,bal,grow);
+      rows.forEach(function(r){ages[r.y]=r.a});
       if(eYear==="all"){
-        h='<table><tr><th>Tahun</th><th>Simpanan Asas</th><th>Lebihan</th><th>Boleh dilaburkan</th></tr>';
+        h='<div class="scroll"><table><tr><th>Tahun</th><th>Umur</th><th>Simpanan Asas</th><th>Lebihan</th><th>Boleh dilaburkan</th></tr>';
         rows.forEach(function(r){
-          var last=r.st==="low"?'<span class="down">Tidak layak</span>':(r.st==="min"?'<span class="down">Kurang RM1,000</span>':'<b class="up">'+money(r.amt)+'</b>');
-          h+='<tr><td>'+r.y+'</td><td>'+money(r.basic)+'</td><td>'+(r.sur>0?money(r.sur):"–")+'</td><td>'+last+'</td></tr>';
+          var last=r.st==="ok"?'<b class="up">'+money(r.amt)+'</b>':'<span class="down">'+(r.st==="min"?"Kurang RM1,000":(r.st==="low"?"Tidak layak":"Rujuk KWSP"))+'</span>';
+          h+='<tr><td>'+r.y+'</td><td>'+r.a+'</td><td>'+(r.basic!=null?money(r.basic):"–")+'</td><td>'+(r.sur>0?money(r.sur):"–")+'</td><td>'+last+'</td></tr>';
         });
-        h+='</table><div class="sub" style="margin-top:6px">Anggaran untuk umur '+age+' dan baki '+money(bal)+' yang sama pada semua tahun. Umur dan baki sebenar anda akan berubah.</div>';
+        h+='</table></div><div class="sub" style="margin-top:8px">Baki '+money(bal)+' dianggap sama pada setiap tahun. Baki sebenar anda akan berubah.</div>';
       }else{
         var r=rows.filter(function(x){return String(x.y)===String(eYear)})[0];
-        h='<div class="epfcard"><div class="sub">Tahun '+r.y+' · umur '+age+' · baki '+money(bal)+'</div><div class="epfamt '+(r.st==="ok"?"up":"down")+'">'+(r.st==="ok"?money(r.amt):"Tidak layak")+'</div><div class="sub">'+epfWhy(r.st)+'</div>'+
-          '<div class="stats"><div>Simpanan Asas<b>'+money(r.basic)+'</b></div><div>Lebihan<b>'+(r.sur>0?money(r.sur):"–")+'</b></div><div>Kadar<b>30%</b></div></div></div>';
+        h='<div class="card"><div class="sub">Tahun '+r.y+' · umur '+r.a+' · baki '+money(bal)+'</div><div class="amt '+(r.st==="ok"?"up":"down")+'">'+(r.st==="ok"?money(r.amt):(r.st==="old"?"Rujuk KWSP":"Tidak layak"))+'</div><div class="sub">'+EWHY[r.st]+'</div>'+
+          (r.basic!=null?'<div class="stats"><div>Simpanan Asas<b>'+money(r.basic)+'</b></div><div>Lebihan<b>'+(r.sur>0?money(r.sur):"–")+'</b></div><div>Kadar<b>30%</b></div></div>':'')+'</div>';
       }
     }
     $("eOut").innerHTML=h;
-    var cols=eYear==="all"?EY:[+eYear],t='<table><tr><th>Umur</th>'+cols.map(function(y){return'<th>'+y+'</th>'}).join("")+'</tr>';
-    Object.keys(BS).forEach(function(a){t+='<tr'+(+a===age?' style="background:var(--accent-soft)"':'')+'><td>'+a+'</td>'+cols.map(function(y){return'<td>'+BS[a][EY.indexOf(y)].toLocaleString("en-MY")+'</td>'}).join("")+'</tr>'});
+    var cols=eYear==="all"?EY:[+eYear],mine={};
+    cols.forEach(function(y){if(ages[y]!=null)mine[ages[y]]=1});
+    var t='<table><tr><th>Umur</th>'+cols.map(function(y){return'<th>'+y+'</th>'}).join("")+'</tr>';
+    Object.keys(BS).forEach(function(a){t+='<tr'+(mine[a]?' class="me"':'')+'><td>'+a+'</td>'+cols.map(function(y){return'<td>'+BS[a][EY.indexOf(y)].toLocaleString("en-MY")+'</td>'}).join("")+'</tr>'});
     $("eTbl").innerHTML=t+'</table>';
   }
-  $("eAge").oninput=renderEpf;$("eBal").oninput=renderEpf;
+  $("eAge").oninput=renderEpf;$("eBal").oninput=renderEpf;$("eGrow").onchange=renderEpf;
   $("eYears").onclick=function(e){var b=e.target.closest("button[data-y]");if(b){eYear=b.dataset.y;renderEpf()}};
   $("eFunds").onclick=function(){showTab("price");$("pep").value="1";renderPrice(1)};
   $("backup").onclick=function(){$("bk").value=JSON.stringify(S);$("dlg2").showModal()};
