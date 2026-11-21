@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>UTrack</title>
+<title>UT Trace</title>
 <meta name="theme-color" content="#1e40af">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="UTrack">
+<meta name="apple-mobile-web-app-title" content="UT Trace">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <style>
 :root{--bg:#f3f6fc;--surface:#fff;--ink:#0b1b3a;--mute:#53627f;--line:#dde5f3;--accent:#1d4ed8;--accent-soft:#e6eeff;--on-accent:#fff;--gain:#0a7a52;--loss:#d62839;--hl:#ffd43b;--hl-soft:#fff6cc;--hero-a:#1e4fd8;--hero-b:#0b2a8a;--shadow:0 1px 2px rgba(11,27,58,.06),0 6px 18px rgba(11,27,58,.08);box-sizing:border-box}
 @media (prefers-color-scheme:dark){:root{--bg:#0a1226;--surface:#121c36;--ink:#e9eefb;--mute:#9aa9c7;--line:#22304f;--accent:#6ea8ff;--accent-soft:#15294f;--on-accent:#061330;--gain:#4ade9f;--loss:#ff7a85;--hl:#ffd43b;--hl-soft:#3a3210;--hero-a:#1e4fd8;--hero-b:#0a2a7a;--shadow:0 1px 2px rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.35)}}
@@ -20,7 +20,7 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
 .top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;background:var(--bg);border-bottom:1px solid var(--line)}
 .top h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center}
-.logo{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#39ff14;color:#082008;font-weight:800;font-size:14px;margin-right:2px}
+.mark{height:44px;width:auto;display:block;flex:0 0 auto}
 main{max-width:600px;margin:0 auto;padding:14px 16px calc(92px + env(safe-area-inset-bottom,0px))}
 h2{margin:0 0 10px;font-size:17px;font-weight:700;letter-spacing:-.01em}
 .sub{color:var(--mute);font-size:13px}
@@ -115,7 +115,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
-<header class="top"><h1 aria-label="UTrack"><span class="logo">UT</span>rack</h1><span class="sub" id="topInfo"></span></header>
+<header class="top"><h1 aria-label="UT Trace"><svg class="mark" viewBox="0 0 120 52" role="img" aria-label="UT Trace"><defs><linearGradient id="utBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f2a63"/><stop offset="1" stop-color="#050d24"/></linearGradient><linearGradient id="utGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".5" stop-color="#f2c94c"/><stop offset="1" stop-color="#b07e12"/></linearGradient><linearGradient id="utSilver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#cdd4e0"/><stop offset="1" stop-color="#8a94a6"/></linearGradient></defs><rect x=".5" y=".5" width="119" height="51" rx="9.5" fill="url(#utBg)" stroke="#ddb03e" stroke-opacity=".55"/><text x="60" y="26" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="27" fill="url(#utGold)">UT</text><rect x="42" y="30" width="36" height="1" fill="#ddb03e"/><text x="60" y="44" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="12.5" letter-spacing="1.2" fill="url(#utSilver)">Trace</text></svg></h1><span class="sub" id="topInfo"></span></header>
 <main>
   <div id="t-port" class="tab">
   <details class="hero" open><summary><div class="lbl">Jumlah nilai pelaburan</div><div class="total" id="total">RM 0.00</div></summary><div class="herobody">
