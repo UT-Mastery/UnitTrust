@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="UT Trace">
+<meta name="application-name" content="UT Trace">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <style>
@@ -124,7 +125,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   <div id="status">Memuatkan harga…</div>
   <div class="row" style="align-items:center;margin:6px 0 10px"><span class="sub" id="fundCount"></span><button id="toggleAll" hidden style="min-height:36px;padding:4px 14px;font-size:13px">Sorok semua</button></div>
   <div id="banner"></div><div id="list"></div>
-  <div class="note">Sumber harga: FIMM (semua syarikat unit amanah berdaftar). NAV ialah Nilai Aset Bersih seunit, dan DCA ialah pelaburan berkala dengan jumlah tetap (purata kos ringgit). Harga FIMM ialah panduan; harga pengurus dana yang rasmi. Data anda disimpan dalam peranti ini sahaja.</div>
+  <div class="note">Sumber harga: FIMM (semua syarikat unit amanah berdaftar). NAV ialah Nilai Aset Bersih seunit, dan DCA ialah pelaburan berkala dengan jumlah tetap (purata kos ringgit). Harga FIMM ialah panduan; harga pengurus dana yang rasmi. Data anda disimpan dalam peranti ini sahaja.<br><b>UT Trace</b> · Jejak unit amanah dan DCA</div>
 </div>
 <div id="t-price" class="tab" hidden>
   <details class="sec" open><summary><b>Carian dan penapis</b></summary>
@@ -201,7 +202,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   <div id="res"></div>
   <button id="close">Tutup</button>
 </dialog>
-<dialog id="dlg2"><h2>Sandaran data</h2><p class="sub">Salin teks ini dan simpan di Nota. Untuk pulih atau pindah ke telefon lain, tampal di sini dan tekan Pulihkan.</p><textarea id="bk" rows="8"></textarea><div class="two" style="margin-top:8px"><button id="bkCopy">Salin</button><button id="bkRestore" class="primary">Pulihkan</button></div><button id="bkClose" style="margin-top:8px;width:100%">Tutup</button></dialog>
+<dialog id="dlg2"><h2>Sandaran data UT Trace</h2><p class="sub">Salin teks ini dan simpan di Nota. Untuk pulih atau pindah ke telefon lain, tampal di sini dan tekan Pulihkan.</p><textarea id="bk" rows="8"></textarea><div class="two" style="margin-top:8px"><button id="bkCopy">Salin</button><button id="bkRestore" class="primary">Pulihkan</button></div><button id="bkClose" style="margin-top:8px;width:100%">Tutup</button></dialog>
 <dialog id="dlg3"><h2>Impor senarai</h2><p class="sub">Salin senarai dana yang layak SPA KWSP (Skim Pelaburan Ahli) daripada laman syarikat dana atau KWSP, kemudian tampal di sini. Jika ada lajur jenis dana (Islamik atau Konvensional), jenis turut ditanda.</p><textarea id="impTxt" rows="8"></textarea><div id="impRes" class="sub" style="margin:8px 0"></div><div class="two"><button id="impClose">Tutup</button><button id="impRun" class="primary">Padankan</button></div></dialog>
 <script>
 (function(){
